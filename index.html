@@ -1,0 +1,3042 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SUPERKOLAK — Supervisi Akademik Kolaborasi Klinis | Lombok Tengah</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    :root {
+      --navy: #0f294a;
+      --navy-light: #1a3f6e;
+      --slate-bg: #f1f5f9;
+      --card-bg: #ffffff;
+      --border: #cbd5e1;
+      --border-soft: #e2e8f0;
+      --text-main: #0f172a;
+      --text-muted: #475569;
+      --accent: #1d4ed8;
+      --accent-soft: #eff6ff;
+      --success: #15803d;
+      --success-bg: #f0fdf4;
+      --warning: #b45309;
+      --warning-bg: #fffbeb;
+      --danger: #b91c1c;
+      --danger-bg: #fef2f2;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Inter', 'IBM Plex Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      background-color: var(--slate-bg);
+      color: var(--text-main);
+      line-height: 1.45;
+      font-size: 14px;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* HEADER INSTANSI MUNGIL & MOBILE-FIRST */
+    .gov-header {
+      background-color: var(--navy);
+      color: #ffffff;
+      border-bottom: 2px solid #d97706;
+      padding: 8px 12px;
+      position: sticky;
+      top: 0;
+      z-index: 40;
+    }
+    .gov-header-inner {
+      max-width: 960px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 6px 12px;
+    }
+    .brand-box {
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+    }
+    .brand-title {
+      font-family: 'IBM Plex Sans', sans-serif;
+      font-size: 14px;
+      font-weight: 700;
+      letter-spacing: 0.4px;
+      line-height: 1.2;
+    }
+    .brand-sub {
+      font-size: 10.5px;
+      color: #cbd5e1;
+      line-height: 1.2;
+      margin-top: 1px;
+    }
+    .user-pill {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 5px;
+      background: rgba(255,255,255,0.1);
+      border: 1px solid rgba(255,255,255,0.2);
+      padding: 4px 8px;
+      border-radius: 5px;
+      font-size: 11px;
+    }
+    .user-name-label {
+      font-weight: 600;
+      color: #f8fafc;
+      max-width: 360px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .btn-hdr {
+      padding: 2px 7px;
+      font-size: 10.5px;
+      font-weight: 600;
+      border-radius: 4px;
+      cursor: pointer;
+      border: 1px solid transparent;
+      line-height: 1.3;
+    }
+    .btn-hdr-pwd { background: #ffffff; color: var(--navy); }
+    .btn-hdr-out { background: #fee2e2; color: #991b1b; }
+
+    /* BANNER MODE SIMULASI */
+    .sim-banner {
+      background: #fef3c7;
+      border-bottom: 1px solid #f59e0b;
+      color: #78350f;
+      padding: 7px 12px;
+      font-size: 12px;
+    }
+    .sim-banner-inner {
+      max-width: 960px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .container {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 12px;
+    }
+
+    /* KARTU & FORM UMUM */
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 14px;
+      margin-bottom: 14px;
+      box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+    }
+    .card-header {
+      border-bottom: 1px solid var(--border-soft);
+      padding-bottom: 10px;
+      margin-bottom: 14px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .card-title {
+      font-family: 'IBM Plex Sans', sans-serif;
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--navy);
+    }
+    .card-desc {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 12px;
+    }
+    @media (min-width: 640px) {
+      .form-grid.cols-2 { grid-template-columns: 1fr 1fr; }
+      .form-grid.cols-3 { grid-template-columns: 1fr 1fr 1fr; }
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-main);
+      margin-bottom: 4px;
+    }
+    .req { color: var(--danger); }
+
+    input[type="text"], input[type="password"], input[type="date"], select, textarea {
+      width: 100%;
+      padding: 9px 11px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      font-family: inherit;
+      font-size: 13.5px;
+      color: var(--text-main);
+      background: #ffffff;
+      transition: border-color 0.15s;
+    }
+    input:focus, select:focus, textarea:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(29, 78, 216, 0.12);
+    }
+    textarea { resize: vertical; min-height: 60px; }
+
+    /* TOMBOL */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      padding: 9px 14px;
+      border-radius: 6px;
+      font-family: inherit;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      border: 1px solid transparent;
+      transition: all 0.15s;
+      text-decoration: none;
+    }
+    .btn:disabled { opacity: 0.55; cursor: not-allowed; }
+    .btn-primary { background: var(--navy); color: #ffffff; }
+    .btn-primary:hover { background: var(--navy-light); }
+    .btn-accent { background: var(--accent); color: #ffffff; }
+    .btn-accent:hover { background: #1e40af; }
+    .btn-success { background: var(--success); color: #ffffff; }
+    .btn-success:hover { background: #166534; }
+    .btn-sim { background: #fffbeb; border-color: #f59e0b; color: #92400e; }
+    .btn-sim:hover { background: #fef3c7; }
+    .btn-outline { background: #ffffff; border-color: var(--border); color: var(--text-main); }
+    .btn-outline:hover { background: #f8fafc; }
+    .btn-danger { background: var(--danger); color: #ffffff; }
+    .btn-sm { padding: 6px 10px; font-size: 12px; }
+    .btn-block { width: 100%; }
+
+    /* TAB AUTH */
+    .auth-wrapper { max-width: 440px; margin: 18px auto; }
+    .tab-bar {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      background: #e2e8f0;
+      padding: 4px;
+      border-radius: 6px;
+      margin-bottom: 16px;
+    }
+    .tab-btn {
+      padding: 8px;
+      text-align: center;
+      font-weight: 600;
+      font-size: 13px;
+      border: none;
+      background: transparent;
+      color: var(--text-muted);
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    .tab-btn.active {
+      background: #ffffff;
+      color: var(--navy);
+      box-shadow: 0 1px 2px rgba(0,0,0,0.08);
+    }
+
+    .pwd-wrap { position: relative; }
+    .pwd-toggle {
+      position: absolute;
+      right: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--accent);
+      cursor: pointer;
+    }
+
+    /* NOTIFIKASI INLINE */
+    .alert {
+      padding: 11px 13px;
+      border-radius: 6px;
+      font-size: 12.5px;
+      margin-bottom: 12px;
+      border: 1px solid;
+    }
+    .alert-info { background: var(--accent-soft); border-color: #bfdbfe; color: #1e3a8a; }
+    .alert-success { background: var(--success-bg); border-color: #bbf7d0; color: #14532d; }
+    .alert-warning { background: var(--warning-bg); border-color: #fde68a; color: #78350f; }
+    .alert-danger { background: var(--danger-bg); border-color: #fecaca; color: #7f1d1d; }
+
+    /* NAVIGASI UTAMA & STEPPER HP */
+    .top-action-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+    .nav-pills {
+      display: flex;
+      gap: 6px;
+      overflow-x: auto;
+      padding-bottom: 2px;
+    }
+    .nav-pill {
+      padding: 8px 11px;
+      background: #ffffff;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      font-weight: 600;
+      font-size: 12px;
+      color: var(--text-muted);
+      cursor: pointer;
+      white-space: nowrap;
+    }
+    .nav-pill.active {
+      background: var(--navy);
+      color: #ffffff;
+      border-color: var(--navy);
+    }
+
+    .stepper-bar {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 5px;
+      margin-bottom: 12px;
+    }
+    .step-item {
+      background: #ffffff;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 7px 4px;
+      text-align: center;
+      cursor: pointer;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-muted);
+    }
+    .step-item span { display: block; font-size: 10px; font-weight: 400; margin-top: 1px; }
+    .step-item.active {
+      border-color: var(--accent);
+      background: var(--accent-soft);
+      color: var(--navy);
+    }
+
+    /* KARTU BUTIR INSTRUMEN MOBILE-FIRST */
+    .item-card {
+      border: 1px solid var(--border-soft);
+      background: #f8fafc;
+      border-radius: 6px;
+      padding: 12px;
+      margin-bottom: 10px;
+    }
+    .item-card.missing-highlight {
+      border: 2px solid var(--danger);
+      background: #fef2f2;
+    }
+    .item-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 8px;
+      margin-bottom: 6px;
+    }
+    .item-num {
+      display: inline-block;
+      background: var(--navy);
+      color: #fff;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 2px 7px;
+      border-radius: 4px;
+      margin-right: 5px;
+    }
+    .item-title {
+      font-weight: 700;
+      font-size: 13px;
+      color: var(--navy);
+    }
+    .badge-opt {
+      font-size: 10.5px;
+      background: #e2e8f0;
+      color: #334155;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+    .badge-sim {
+      display: inline-block;
+      font-size: 10px;
+      background: #fef3c7;
+      color: #92400e;
+      border: 1px solid #f59e0b;
+      padding: 1px 6px;
+      border-radius: 4px;
+      font-weight: 700;
+      margin-left: 4px;
+    }
+    .item-indikator {
+      font-size: 12.5px;
+      color: var(--text-main);
+      margin-bottom: 9px;
+      white-space: pre-line;
+    }
+
+    /* TOMBOL PILIHAN YA/TIDAK & SKOR 1-4 RAMAH JEMPOL */
+    .choice-row {
+      display: flex;
+      gap: 6px;
+      margin-bottom: 8px;
+      flex-wrap: wrap;
+    }
+    .choice-btn {
+      flex: 1;
+      min-width: 68px;
+      padding: 8px 8px;
+      border: 1px solid var(--border);
+      background: #ffffff;
+      border-radius: 6px;
+      font-weight: 600;
+      font-size: 12.5px;
+      color: var(--text-main);
+      cursor: pointer;
+      text-align: center;
+    }
+    .choice-btn.selected-ya { background: var(--success); color: #fff; border-color: var(--success); }
+    .choice-btn.selected-tidak { background: var(--danger); color: #fff; border-color: var(--danger); }
+    .choice-btn.selected-opt { background: #475569; color: #fff; border-color: #475569; }
+    .choice-btn.selected-skor { background: var(--accent); color: #fff; border-color: var(--accent); }
+
+    /* PANEL SKOR REAL-TIME */
+    .score-banner {
+      background: var(--navy);
+      color: #ffffff;
+      border-radius: 8px;
+      padding: 12px 14px;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      text-align: center;
+      margin: 14px 0;
+    }
+    .score-box small { display: block; font-size: 10.5px; color: #cbd5e1; }
+    .score-box strong { font-size: 16px; font-weight: 700; display: block; margin-top: 2px; }
+
+    .section-divider {
+      background: #e2e8f0;
+      color: var(--navy);
+      font-weight: 700;
+      font-size: 12.5px;
+      padding: 7px 10px;
+      border-radius: 5px;
+      margin: 16px 0 10px 0;
+      border-left: 4px solid var(--navy);
+    }
+
+    /* GRAFIK VISUAL RINGAN & RAMAH HP */
+    .chart-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+    @media (min-width: 680px) {
+      .chart-grid.two { grid-template-columns: 1fr 1fr; }
+    }
+    .chart-box {
+      background: #f8fafc;
+      border: 1px solid var(--border-soft);
+      border-radius: 8px;
+      padding: 12px;
+    }
+    .chart-title {
+      font-size: 12.5px;
+      font-weight: 700;
+      color: var(--navy);
+      margin-bottom: 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .bar-row {
+      margin-bottom: 8px;
+    }
+    .bar-row:last-child { margin-bottom: 0; }
+    .bar-label-top {
+      display: flex;
+      justify-content: space-between;
+      font-size: 11.5px;
+      margin-bottom: 3px;
+      color: var(--text-main);
+    }
+    .bar-track {
+      width: 100%;
+      height: 10px;
+      background: #e2e8f0;
+      border-radius: 99px;
+      overflow: hidden;
+    }
+    .bar-fill {
+      height: 100%;
+      border-radius: 99px;
+      transition: width 0.35s ease;
+    }
+/* KARTU RINGKASAN EKSEKUTIF ADMIN */
+.admin-kpi-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
+  margin-bottom: 18px;
+}
+@media (min-width: 640px) {
+  .admin-kpi-grid { grid-template-columns: repeat(2, 1fr); }
+}
+@media (min-width: 900px) {
+  .admin-kpi-grid { grid-template-columns: repeat(4, 1fr); }
+}
+.admin-kpi-card {
+  background: #ffffff;
+  border: 1px solid var(--border);
+  border-top-width: 3px;
+  border-radius: 8px;
+  padding: 12px 14px;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+}
+.kpi-navy { border-top-color: #1e3a8a; background: linear-gradient(180deg, #f8fafc 0%, #ffffff 100%); }
+.kpi-blue { border-top-color: #0284c7; background: linear-gradient(180deg, #f0f9ff 0%, #ffffff 100%); }
+.kpi-teal { border-top-color: #0d9488; background: linear-gradient(180deg, #f0fdfa 0%, #ffffff 100%); }
+.kpi-amber { border-top-color: #d97706; background: linear-gradient(180deg, #fffbeb 0%, #ffffff 100%); }
+.admin-kpi-label {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  color: var(--text-muted);
+  margin-bottom: 4px;
+}
+.admin-kpi-value {
+  font-size: 20px;
+  font-weight: 800;
+  color: var(--navy);
+  line-height: 1.2;
+}
+.admin-kpi-sub {
+  font-size: 11.5px;
+  color: var(--text-muted);
+  margin-top: 3px;
+}
+    /* PANEL KONTROL ADMIN & NARASI */
+    .gate-control-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+    @media (min-width: 640px) {
+      .gate-control-grid { grid-template-columns: 1fr 1fr; }
+    }
+    .gate-card {
+      border: 1px solid var(--border);
+      background: #f8fafc;
+      border-radius: 8px;
+      padding: 12px;
+    }
+    .gate-status-badge {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 99px;
+      font-size: 11px;
+      font-weight: 700;
+    }
+    .status-on { background: #dcfce7; color: #166534; }
+    .status-off { background: #fee2e2; color: #991b1b; }
+
+    .narasi-box {
+      background: #ffffff;
+      border: 1px solid var(--border);
+      border-left: 4px solid var(--navy);
+      border-radius: 6px;
+      padding: 11px 12px;
+      margin-bottom: 10px;
+    }
+    .narasi-meta {
+      font-size: 11.5px;
+      font-weight: 700;
+      color: var(--navy);
+      margin-bottom: 5px;
+      border-bottom: 1px dashed var(--border);
+      padding-bottom: 4px;
+    }
+    .narasi-item {
+      font-size: 12.5px;
+      margin-bottom: 4px;
+    }
+
+    /* TABEL REKAP */
+    .table-wrap { overflow-x: auto; }
+    table.data-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12.5px;
+    }
+    table.data-table th, table.data-table td {
+      border: 1px solid var(--border);
+      padding: 8px 9px;
+      text-align: left;
+      vertical-align: top;
+    }
+    table.data-table th {
+      background: #f1f5f9;
+      color: var(--navy);
+      font-weight: 700;
+    }
+
+    .hidden { display: none !important; }
+
+    /* MODAL */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.55);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      z-index: 60;
+    }
+    .modal-box {
+      background: #ffffff;
+      border-radius: 8px;
+      max-width: 420px;
+      width: 100%;
+      padding: 18px;
+      border: 1px solid var(--border);
+      box-shadow: 0 10px 25px rgba(15, 23, 42, 0.2);
+    }
+
+    /* MODE CETAK DOKUMEN RESMI */
+    @media print {
+      body { background: #ffffff; font-size: 11pt; }
+      .no-print { display: none !important; }
+      #printArea { display: block !important; }
+      .print-page-break { page-break-before: always; }
+    }
+    #printArea {
+      display: none;
+      background: #ffffff;
+      color: #000000;
+      font-family: 'Times New Roman', Times, serif;
+      padding: 10px;
+    }
+    #printArea h2, #printArea h3 { text-align: center; margin: 4px 0; font-size: 13pt; }
+    #printArea table { width: 100%; border-collapse: collapse; margin: 8px 0 14px 0; font-size: 10pt; }
+    #printArea th, #printArea td { border: 1px solid #000; padding: 5px 6px; vertical-align: top; }
+    #printArea th { background: #f3f4f6; }
+    .ttd-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+      margin-top: 20px;
+      font-size: 10.5pt;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- HEADER INSTANSI MUNGIL -->
+  <header class="gov-header no-print">
+    <div class="gov-header-inner">
+      <div class="brand-box">
+        <div class="brand-title">SUPERKOLAK</div>
+        <div class="brand-sub">Supervisi Akademik Kolaborasi Klinis &bull; Lombok Tengah</div>
+      </div>
+      <div id="headerUserBox" class="user-pill hidden">
+        <span id="headerUserText" class="user-name-label">-</span>
+        <button type="button" id="btnHdrPwd" class="btn-hdr btn-hdr-pwd" onclick="bukaModalPassword()">Ubah Sandi</button>
+        <button type="button" class="btn-hdr btn-hdr-out" onclick="logout()">Keluar</button>
+      </div>
+    </div>
+  </header>
+
+  <!-- BANNER STATUS SIMULASI AKTIF -->
+  <div id="simActiveBanner" class="sim-banner hidden no-print">
+    <div class="sim-banner-inner">
+      <div><strong>MODE SIMULASI AKTIF:</strong> Isian otomatis terisi &amp; bebas diubah. Data hanya tersimpan sementara di perangkat ini (tidak masuk ke database resmi).</div>
+      <button type="button" class="btn btn-sm btn-outline" style="padding:3px 9px;font-size:11.5px;border-color:#d97706;" onclick="keluarModeSimulasi()">Keluar Simulasi</button>
+    </div>
+  </div>
+
+  <!-- HALAMAN 1: LOGIN & REGISTRASI PENGAWAS -->
+  <main id="authSection" class="container auth-wrapper no-print">
+    <div class="card">
+      <div class="card-header">
+        <div>
+          <div class="card-title">Portal Pengawas Sekolah</div>
+          <div class="card-desc">Masuk dengan akun pengawas atau lakukan registrasi satu kali.</div>
+        </div>
+      </div>
+
+      <div class="tab-bar">
+        <button id="tabLoginBtn" class="tab-btn active" onclick="switchAuthTab('login')">Masuk Akun</button>
+        <button id="tabRegBtn" class="tab-btn" onclick="switchAuthTab('register')">Registrasi Baru</button>
+      </div>
+
+      <div id="authAlert" class="alert hidden"></div>
+
+      <!-- FORM LOGIN -->
+      <form id="loginForm" onsubmit="handleLogin(event)">
+        <div id="loginClosedNotice" class="alert alert-warning hidden">
+          <strong>Akses Login Pengawas Sedang Ditutup Sementara</strong> oleh Admin Kabupaten. Silakan hubungi koordinator pengawas.
+        </div>
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Username <span class="req">*</span></label>
+            <input type="text" id="loginUsername" placeholder="Contoh: psahmad01 atau dummy" autocomplete="username" required />
+          </div>
+          <div class="form-group">
+            <label>Kata Sandi <span class="req">*</span></label>
+            <div class="pwd-wrap">
+              <input type="password" id="loginPassword" placeholder="Masukkan kata sandi" autocomplete="current-password" required />
+              <button type="button" class="pwd-toggle" onclick="togglePwd('loginPassword', this)">Lihat</button>
+            </div>
+          </div>
+          <button type="submit" id="btnLogin" class="btn btn-primary btn-block">Masuk</button>
+        </div>
+        <div style="margin-top:10px;padding-top:10px;border-top:1px dashed var(--border);font-size:11.5px;color:var(--text-muted);text-align:center;">
+          Uji coba tanpa akun resmi: username <strong>dummy</strong> &bull; sandi <strong>dummy</strong>
+        </div>
+      </form>
+
+      <!-- FORM REGISTRASI -->
+      <form id="registerForm" class="hidden" onsubmit="handleRegister(event)">
+        <div id="regClosedNotice" class="alert alert-warning hidden">
+          <strong>Registrasi Pengawas Baru Sedang Ditutup Sementara</strong> oleh Admin Kabupaten.
+        </div>
+        <div id="regOpenBody">
+          <div class="alert alert-info" style="font-size:12px;">
+            Username dibuat otomatis berurutan (contoh: <strong>psahmad01</strong>). Silakan lengkapi nama dan asal kecamatan Anda.
+          </div>
+          <div class="form-grid">
+            <div class="form-group">
+              <label>Nama Lengkap Pengawas <span class="req">*</span></label>
+              <input type="text" id="regNama" placeholder="Contoh: Ahmad Supriadi" required />
+            </div>
+            <div class="form-group">
+              <label>Asal Kecamatan Pengawas <span class="req">*</span></label>
+              <select id="regKecamatan" required></select>
+            </div>
+            <button type="submit" id="btnReg" class="btn btn-success btn-block">Daftar &amp; Buat Username Otomatis</button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </main>
+
+  <!-- HALAMAN 2: RUANG KERJA PENGAWAS & ADMIN -->
+  <main id="appSection" class="container hidden no-print">
+    <!-- NAVIGASI MENU & TOMBOL SIMULASI -->
+    <div class="top-action-bar">
+      <div class="nav-pills">
+        <button id="navFormBtn" class="nav-pill active" onclick="switchMainView('form')">Isi Instrumen</button>
+        <button id="navMyListBtn" class="nav-pill" onclick="switchMainView('mylist')">Riwayat Laporan</button>
+        <button id="navAllRekapBtn" class="nav-pill" onclick="switchMainView('rekap')">Rekap Kabupaten</button>
+        <button id="navAdminBtn" class="nav-pill hidden" onclick="switchMainView('admin')">Panel Admin</button>
+      </div>
+      <button type="button" id="btnMulaiSimulasi" class="btn btn-sm btn-sim" onclick="bukaModalSimulasi()">Mode Simulasi</button>
+    </div>
+
+    <!-- VIEW A: FORMULIR 4 BAGIAN SUPERKOLAK -->
+    <section id="viewForm">
+      <!-- STEPPER NAVIGASI -->
+      <div class="stepper-bar">
+        <div id="stepTab0" class="step-item active" onclick="goStep(0)">1. Identitas<span>Sasaran &amp; Lokasi</span></div>
+        <div id="stepTab1" class="step-item" onclick="goStep(1)">2. Praobservasi<span>20 Butir RPP/MA</span></div>
+        <div id="stepTab2" class="step-item" onclick="goStep(2)">3. Observasi<span>Skor &amp; PM (1-20)</span></div>
+        <div id="stepTab3" class="step-item" onclick="goStep(3)">4. Pascaobservasi<span>Refleksi &amp; Kirim</span></div>
+      </div>
+
+      <div id="formAlert" class="alert hidden"></div>
+
+      <!-- BAGIAN 1: IDENTITAS -->
+      <div id="step0" class="card">
+        <div class="card-header">
+          <div>
+            <div class="card-title">Identitas Kegiatan &amp; Sasaran Supervisi</div>
+            <div class="card-desc">1 pengawas = 1 sekolah sasaran per periode bulan kegiatan (3 JP).</div>
+          </div>
+        </div>
+        <div class="form-grid cols-2">
+          <div class="form-group">
+            <label>Periode Bulan Supervisi <span class="req">*</span></label>
+            <select id="fPeriodeBulan" onchange="cekStatusKunciBulan()"></select>
+          </div>
+          <div class="form-group">
+            <label>Tanggal Pelaksanaan <span class="req">*</span></label>
+            <input type="date" id="fTanggal" />
+          </div>
+          <div class="form-group">
+            <label>Kecamatan Sasaran Supervisi <span class="req">*</span></label>
+            <select id="fKecamatanSasaran" onchange="updateDropdownSekolah()"></select>
+          </div>
+          <div class="form-group">
+            <label>Nama Sekolah Sasaran <span class="req">*</span></label>
+            <select id="fSekolah">
+              <option value="">-- Pilih Kecamatan Sasaran Terlebih Dahulu --</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Nama Kepala Sekolah <span class="req">*</span></label>
+            <input type="text" id="fKepsek" placeholder="Nama lengkap kepala sekolah" />
+          </div>
+          <div class="form-group">
+            <label>Nama Guru yang Disupervisi <span class="req">*</span></label>
+            <input type="text" id="fGuru" placeholder="Nama lengkap guru" />
+          </div>
+          <div class="form-group">
+            <label>Mata Pelajaran / Guru Kelas <span class="req">*</span></label>
+            <input type="text" id="fMapel" placeholder="Contoh: Matematika / Guru Kelas IV" />
+          </div>
+          <div class="form-group">
+            <label>Kelas / Semester <span class="req">*</span></label>
+            <input type="text" id="fKelas" placeholder="Contoh: IV / Ganjil" />
+          </div>
+          <div class="form-group" style="grid-column: 1 / -1;">
+            <label>Materi Pokok Pembelajaran <span class="req">*</span></label>
+            <input type="text" id="fMateri" placeholder="Tuliskan materi pokok yang diajarkan saat observasi" />
+          </div>
+        </div>
+        <div style="margin-top:16px; display:flex; justify-content:flex-end;">
+          <button type="button" class="btn btn-primary" onclick="goStep(1)">Lanjut ke Praobservasi &rarr;</button>
+        </div>
+      </div>
+
+      <!-- BAGIAN 2: PRAOBSERVASI -->
+      <div id="step1" class="card hidden">
+        <div class="card-header">
+          <div>
+            <div class="card-title">Praobservasi (Telaah RPP / Modul Ajar)</div>
+            <div class="card-desc">Pilih Ya atau Tidak pada setiap komponen (20 butir).</div>
+          </div>
+          <button type="button" class="btn btn-sm btn-outline" onclick="isiSemuaPraYa()">Tandai Semua "Ya"</button>
+        </div>
+        <div id="praContainer"></div>
+        <div style="margin-top:16px; display:flex; justify-content:space-between; gap:10px;">
+          <button type="button" class="btn btn-outline" onclick="goStep(0)">&larr; Kembali</button>
+          <button type="button" class="btn btn-primary" onclick="goStep(2)">Lanjut ke Pelaksanaan Observasi &rarr;</button>
+        </div>
+      </div>
+
+      <!-- BAGIAN 3: PELAKSANAAN OBSERVASI -->
+      <div id="step2" class="card hidden">
+        <div class="card-header">
+          <div>
+            <div class="card-title">Pelaksanaan Observasi &amp; Pembelajaran Mendalam</div>
+            <div class="card-desc">Beri skor 1–4 pada butir 1–8 (wajib) dan lengkapi implementasi pembelajaran mendalam pada butir 9–20.</div>
+          </div>
+        </div>
+
+        <div id="obsSkorContainer"></div>
+
+        <!-- RINGKASAN NILAI OTOMATIS -->
+        <div class="score-banner">
+          <div class="score-box">
+            <small>Total Skor (Maks. 32)</small>
+            <strong id="dispTotalSkor">0</strong>
+          </div>
+          <div class="score-box">
+            <small>Nilai Akhir (NA)</small>
+            <strong id="dispNilaiAkhir">0.00</strong>
+          </div>
+          <div class="score-box">
+            <small>Kategori Predikat</small>
+            <strong id="dispKategori">-</strong>
+          </div>
+        </div>
+
+        <div class="section-divider">E. IMPLEMENTASI PEMBELAJARAN MENDALAM (Butir 9 – 20)</div>
+        <div id="obsPmContainer"></div>
+
+        <div class="section-divider">RINGKASAN HASIL OBSERVASI SUPERVISOR</div>
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Catatan Supervisor</label>
+            <textarea id="fCatatanSup" placeholder="Tuliskan catatan umum hasil pengamatan pembelajaran..."></textarea>
+          </div>
+          <div class="form-group">
+            <label>Rekomendasi</label>
+            <textarea id="fRekomendasi" placeholder="Tuliskan rekomendasi penguatan praktik pembelajaran..."></textarea>
+          </div>
+          <div class="form-group">
+            <label>Tindak Lanjut</label>
+            <textarea id="fTindakLanjut" placeholder="Tuliskan rencana tindak lanjut kolaboratif..."></textarea>
+          </div>
+        </div>
+
+        <div style="margin-top:16px; display:flex; justify-content:space-between; gap:10px;">
+          <button type="button" class="btn btn-outline" onclick="goStep(1)">&larr; Kembali</button>
+          <button type="button" class="btn btn-primary" onclick="goStep(3)">Lanjut ke Pascaobservasi &rarr;</button>
+        </div>
+      </div>
+
+      <!-- BAGIAN 4: PASCAOBSERVASI & KIRIM -->
+      <div id="step3" class="card hidden">
+        <div class="card-header">
+          <div>
+            <div class="card-title">Pascaobservasi (Refleksi Kolaboratif)</div>
+            <div class="card-desc">Catat hasil diskusi refleksi bersama guru setelah pembelajaran selesai.</div>
+          </div>
+        </div>
+        <div id="pascaContainer"></div>
+
+        <div class="alert alert-info" style="margin-top:14px;">
+          <strong>Pengesahan Laporan:</strong> Laporan akan tercatat atas nama Supervisor <strong id="confirmSupName">-</strong>, Guru <strong id="confirmGuruName">-</strong>, dan Kepala Sekolah <strong id="confirmKepsekName">-</strong>.
+        </div>
+
+        <div style="margin-top:16px; display:flex; justify-content:space-between; gap:10px; flex-wrap:wrap;">
+          <button type="button" class="btn btn-outline" onclick="goStep(2)">&larr; Kembali</button>
+          <button type="button" id="btnSimpanLaporan" class="btn btn-success" onclick="submitLaporan()">Simpan &amp; Kirim Laporan</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- VIEW B: RIWAYAT LAPORAN SAYA + GRAFIK CAPAIAN -->
+    <section id="viewMylist" class="card hidden">
+      <div class="card-header">
+        <div>
+          <div class="card-title">Riwayat Laporan Supervisi Saya</div>
+          <div class="card-desc">Grafik ringkasan dan daftar laporan yang telah dikirimkan. Klik "Cetak / PDF" untuk berita acara resmi.</div>
+        </div>
+        <button class="btn btn-sm btn-outline" onclick="loadMyReports()">Muat Ulang</button>
+      </div>
+
+      <!-- GRAFIK RIWAYAT SAYA -->
+      <div id="myChartArea" class="chart-grid two hidden">
+        <div class="chart-box">
+          <div class="chart-title"><span>Sebaran Predikat Nilai Saya</span><span id="myAvgBadge" style="color:var(--accent);">Rata-rata: -</span></div>
+          <div id="myPredikatChart"></div>
+        </div>
+        <div class="chart-box">
+          <div class="chart-title"><span>Nilai Akhir per Sekolah Sasaran</span></div>
+          <div id="mySchoolScoreChart"></div>
+        </div>
+      </div>
+
+      <div class="table-wrap">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>No</th>
+              <th>Periode &amp; Tanggal</th>
+              <th>Kecamatan Sasaran</th>
+              <th>Sekolah &amp; Guru</th>
+              <th>Nilai Akhir</th>
+              <th>Aksi</th>
+            </tr>
+          </thead>
+          <tbody id="myReportsBody">
+            <tr><td colspan="6" style="text-align:center;">Memuat data...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- VIEW C: REKAPITULASI KABUPATEN (12 KECAMATAN) + GRAFIK -->
+    <section id="viewRekap" class="card hidden">
+      <div class="card-header">
+        <div>
+          <div class="card-title">Rekapitulasi Supervisi Pengawas Lombok Tengah</div>
+          <div class="card-desc">Grafik sebaran dan pantauan laporan masuk lintas 12 kecamatan.</div>
+        </div>
+        <button class="btn btn-sm btn-outline" onclick="loadAllRekap()">Segarkan Data</button>
+      </div>
+
+      <div class="form-grid cols-3" style="margin-bottom:12px;">
+        <div class="form-group">
+          <label>Filter Kecamatan Sasaran</label>
+          <select id="filterRekapKec" onchange="renderRekapTable()">
+            <option value="">Semua Kecamatan (12 Kecamatan)</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Filter Periode Bulan</label>
+          <select id="filterRekapBulan" onchange="renderRekapTable()">
+            <option value="">Semua Periode</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Ringkasan Capaian</label>
+          <div id="rekapSummaryBox" style="padding:8px 11px;background:#f8fafc;border:1px solid var(--border);border-radius:6px;font-weight:700;color:var(--navy);">
+            0 Laporan Tercatat
+          </div>
+        </div>
+      </div>
+      <div id="adminKecDashboardBox" class="hidden" style="margin-bottom:14px; padding:12px 14px; background:#f8fafc; border:1px solid var(--border); border-radius:8px;">
+        <div style="display:flex; flex-wrap:wrap; gap:10px; align-items:center; justify-content:space-between; margin-bottom:10px;">
+          <div style="font-weight:600; color:#0f172a;">Pantauan Wilayah Kecamatan: <span id="adminKecJudulWilayah">-</span></div>
+          <div style="display:flex; gap:8px; flex-wrap:wrap; font-size:12.5px;">
+            <span style="background:#e0f2fe; color:#0369a1; padding:4px 10px; border-radius:999px; font-weight:600;">Pengawas Mengisi: <span id="adminKecJmlPengawas">0</span></span>
+            <span style="background:#dcfce7; color:#15803d; padding:4px 10px; border-radius:999px; font-weight:600;">Rata-Rata Nilai: <span id="adminKecRataNilai">0.0</span></span>
+          </div>
+        </div>
+        <div class="form-group" style="margin-bottom:0;">
+          <label for="cariSekolahRekap" style="font-size:12.5px;">Cari Cepat Nama Sekolah</label>
+          <input type="text" id="cariSekolahRekap" placeholder="Ketik nama sekolah di kecamatan Anda..." oninput="renderRekapTable()" />
+        </div>
+        <div style="margin-top:12px; display:grid; grid-template-columns:repeat(auto-fit, minmax(280px, 1fr)); gap:12px;">
+            <div style="background:#ffffff; border:1px solid #cbd5e1; border-radius:8px; padding:12px;">
+              <div style="font-weight:600; font-size:13px; color:#0f172a; margin-bottom:8px;">Sebaran Predikat Sekolah Tersupervisi</div>
+              <div id="adminKecPredikatChart" style="display:flex; flex-direction:column; gap:8px; font-size:12.5px;"></div>
+            </div>
+            <div style="background:#ffffff; border:1px solid #cbd5e1; border-radius:8px; padding:12px;">
+              <div style="font-weight:600; font-size:13px; color:#0f172a; margin-bottom:8px;">Kesimpulan Gabungan Hasil Supervisi Wilayah</div>
+              <div id="adminKecSintesisBox" style="display:flex; flex-direction:column; gap:8px; font-size:12.5px; line-height:1.55; color:#334155;"></div>
+            </div>
+          </div>
+      </div>
+
+      <!-- GRAFIK REKAP KABUPATEN -->
+      <div id="rekapChartArea" class="chart-grid two hidden">
+        <div class="chart-box">
+          <div class="chart-title"><span>Sebaran Predikat Nilai Kabupaten</span><span id="rekapAvgBadge" style="color:var(--accent);">Rata-rata: -</span></div>
+          <div id="rekapPredikatChart"></div>
+        </div>
+        <div class="chart-box">
+          <div class="chart-title"><span>Jumlah Laporan per Kecamatan Sasaran</span></div>
+          <div id="rekapKecChart"></div>
+        </div>
+      </div>
+
+      <div class="table-wrap">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>No</th>
+              <th>Periode</th>
+              <th>Kecamatan Sasaran</th>
+              <th>Sekolah &amp; Guru</th>
+              <th>Nilai &amp; Predikat</th>
+              <th>Pengawas (Supervisor)</th>
+              <th>Lembar</th>
+            </tr>
+          </thead>
+          <tbody id="allRekapBody">
+            <tr><td colspan="7" style="text-align:center;">Memuat data...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- VIEW D: PANEL ADMIN (KONTROL AKSES LOGIN/REGISTRASI & NARASI UMUM KABUPATEN) -->
+    <section id="viewAdmin" class="card hidden">
+      <div class="card-header">
+        <div>
+          <div class="card-title">Panel Kontrol Admin &amp; Sintesis Narasi Kabupaten</div>
+          <div class="card-desc">Atur buka/tutup pintu registrasi &amp; login pengawas, serta rangkum catatan supervisor, rekomendasi, dan tindak lanjut.</div>
+        </div>
+        <div style="display:flex; gap:8px; flex-wrap:wrap;">
+        <button type="button" class="btn btn-sm btn-primary" onclick="bukaModalDaftarPengawas()">Daftar Akun Pengawas</button>
+        <button type="button" class="btn btn-sm btn-outline" onclick="loadAdminPanel()">Segarkan Panel</button>
+      </div>
+      </div>
+<!-- RINGKASAN STATUS & CAPAIAN KABUPATEN -->
+    <div class="admin-kpi-grid">
+      <div class="admin-kpi-card kpi-navy">
+        <div class="admin-kpi-label">Status Portal Pengawas</div>
+        <div class="admin-kpi-value" id="adminStatPortal">-</div>
+        <div class="admin-kpi-sub" id="adminStatPortalSub">Memeriksa akses...</div>
+      </div>
+      <div class="admin-kpi-card kpi-blue">
+        <div class="admin-kpi-label">Total Laporan Masuk</div>
+        <div class="admin-kpi-value" id="adminStatLaporan">0</div>
+        <div class="admin-kpi-sub">Seluruh kecamatan sasaran</div>
+      </div>
+      <div class="admin-kpi-card kpi-teal">
+        <div class="admin-kpi-label">Rata-rata Nilai Kabupaten</div>
+        <div class="admin-kpi-value" id="adminStatAvg">0.0</div>
+        <div class="admin-kpi-sub" id="adminStatPredikat">Belum ada data</div>
+      </div>
+      <div class="admin-kpi-card kpi-amber">
+        <div class="admin-kpi-label">Laporan Bermuat Narasi</div>
+        <div class="admin-kpi-value" id="adminStatNarasi">0</div>
+        <div class="admin-kpi-sub">Catatan, rekomendasi & RTL</div>
+      </div>
+    </div>
+      <!-- 1. SAKELAR BUKA / TUTUP PINTU REGISTRASI & LOGIN -->
+      <div class="section-divider" style="margin-top:0;">1. PENGATURAN AKSES PORTAL PENGAWAS (BUKA / TUTUP)</div>
+      <div id="gateAlert" class="alert hidden"></div>
+      <div class="gate-control-grid">
+        <div class="gate-card">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+            <strong>Pintu Registrasi Pengawas Baru</strong>
+            <span id="badgeRegStatus" class="gate-status-badge status-on">DIBUKA</span>
+          </div>
+          <p style="font-size:12px;color:var(--text-muted);margin-bottom:10px;">
+            Jika dimatikan, tab Registrasi Baru tidak bisa dipakai mendaftar akun baru.
+          </p>
+          <button type="button" id="btnToggleReg" class="btn btn-sm btn-outline" onclick="togglePortalGate('reg')">Matikan Registrasi</button>
+        </div>
+
+        <div class="gate-card">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+            <strong>Pintu Login Pengawas Resmi</strong>
+            <span id="badgeLoginStatus" class="gate-status-badge status-on">DIBUKA</span>
+          </div>
+          <p style="font-size:12px;color:var(--text-muted);margin-bottom:10px;">
+            Jika dimatikan, akun pengawas resmi ditahan masuk (akun <strong>dummy</strong> &amp; <strong>admin</strong> tetap bisa masuk).
+          </p>
+          <button type="button" id="btnToggleLogin" class="btn btn-sm btn-outline" onclick="togglePortalGate('login')">Matikan Login</button>
+        </div>
+      </div>
+
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;">
+        <button type="button" class="btn btn-sm btn-danger" onclick="setBothGates(false)">Matikan Keduanya (Registrasi &amp; Login)</button>
+        <button type="button" class="btn btn-sm btn-success" onclick="setBothGates(true)">Buka Keduanya (Registrasi &amp; Login)</button>
+      </div>
+
+      <!-- 2. RANGKUMAN NARASI UMUM (CATATAN SUPERVISOR, REKOMENDASI, TINDAK LANJUT) -->
+      <div class="section-divider">2. REKAP NARASI UMUM (CATATAN SUPERVISOR, REKOMENDASI &amp; TINDAK LANJUT)</div>
+      <div class="form-grid cols-3" style="margin-bottom:12px;">
+        <div class="form-group">
+          <label>Filter Kecamatan</label>
+          <select id="adminFilterKec" onchange="renderAdminNarasi()">
+            <option value="">Semua Kecamatan</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Filter Periode Bulan</label>
+          <select id="adminFilterBulan" onchange="renderAdminNarasi()">
+            <option value="">Semua Periode</option>
+          </select>
+        </div>
+        <div class="form-group" style="display:flex;align-items:flex-end;gap:6px;">
+          <button type="button" class="btn btn-sm btn-primary btn-block" onclick="salinNarasiUmum()">Salin Semua Narasi</button>
+        </div>
+      </div>
+
+      <div id="adminNarasiSummary" class="alert alert-info" style="font-size:12px;">
+        Menampilkan rangkuman narasi dari laporan yang masuk.
+      </div>
+      <div id="adminNarasiList"></div>
+    </section>
+  </main>
+
+  <!-- MODAL KONFIRMASI SIMULASI -->
+  <div id="modalSimulasi" class="modal-backdrop hidden no-print">
+    <div class="modal-box">
+      <div class="card-title" style="margin-bottom:6px;">Konfirmasi Mode Simulasi</div>
+      <div class="card-desc" style="margin-bottom:14px;line-height:1.5;color:#1e293b;">
+        Anda akan memasuki <strong>Mode Simulasi (Uji Coba)</strong>.<br><br>
+        &bull; Seluruh kolom dari awal sampai akhir akan terisi contoh data dummy secara otomatis.<br>
+        &bull; Semua isian (termasuk pilihan kecamatan, sekolah, skor, dan catatan) <strong>tetap terbuka bebas untuk Anda ubah</strong>.<br>
+        &bull; Hasil simulasi dapat dicek di <em>Riwayat Laporan</em>, <em>Rekap</em>, dan <em>Cetak / PDF</em> tanpa masuk ke database resmi.
+      </div>
+      <div style="display:flex;gap:8px;justify-content:flex-end;">
+        <button type="button" class="btn btn-outline" onclick="tutupModalSimulasi()">Batal</button>
+        <button type="button" class="btn btn-primary" onclick="aktifkanModeSimulasi()">Ya, Lanjutkan Simulasi</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL UBAH SANDI -->
+  <div id="modalPwd" class="modal-backdrop hidden no-print">
+    <div class="modal-box">
+      <div class="card-title" style="margin-bottom:6px;">Ubah Kata Sandi Akun</div>
+      <div class="card-desc" style="margin-bottom:12px;">Ganti kata sandi akun Anda dengan kata sandi pribadi baru.</div>
+      <div id="pwdModalAlert" class="alert hidden"></div>
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Kata Sandi Baru</label>
+          <input type="password" id="newPwd1" placeholder="Minimal 4 karakter" />
+        </div>
+        <div class="form-group">
+          <label>Ulangi Kata Sandi Baru</label>
+          <input type="password" id="newPwd2" placeholder="Ketik ulang kata sandi baru" />
+        </div>
+        <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:6px;">
+          <button type="button" class="btn btn-outline" onclick="tutupModalPassword()">Batal</button>
+          <button type="button" class="btn btn-primary" onclick="simpanPasswordBaru()">Simpan Sandi</button>
+        </div>
+      </div>
+    </div>
+  </div>
+<!-- MODAL DAFTAR AKUN PENGAWAS (ADMIN) -->
+<div id="modalDaftarPengawas" class="modal-backdrop hidden no-print">
+  <div class="modal-box" style="max-width:860px; width:96%; max-height:88vh; display:flex; flex-direction:column;">
+    <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:10px; margin-bottom:10px;">
+      <div>
+        <div class="card-title" style="margin-bottom:3px;">Daftar Akun Pengawas Terdaftar</div>
+        <div class="card-desc" style="margin:0;">Filter berdasarkan kecamatan atau nama untuk mengecek password &amp; menyalin info akun.</div>
+      </div>
+      <button type="button" class="btn btn-sm btn-outline" onclick="tutupModalDaftarPengawas()">Tutup</button>
+    </div>
+
+    <div class="form-grid" style="grid-template-columns: 1fr 1.2fr; gap:10px; margin-bottom:10px;">
+      <div class="form-group" style="margin:0;">
+        <label style="font-size:12px;">Filter Kecamatan</label>
+        <select id="filterKecPengawas" onchange="renderTabelPengawas()">
+          <option value="">Semua Kecamatan</option>
+        </select>
+      </div>
+      <div class="form-group" style="margin:0;">
+        <label style="font-size:12px;">Cari Nama / Username</label>
+        <input type="text" id="cariNamaPengawas" placeholder="Ketik nama atau username..." oninput="renderTabelPengawas()" />
+      </div>
+    </div>
+
+    <div id="infoJumlahPengawas" style="font-size:12.5px; color:var(--text-muted); margin-bottom:8px; font-weight:600;">
+      Memuat daftar akun...
+    </div>
+
+    <div id="alertSalinAkun" class="alert alert-success hidden" style="padding:7px 12px; font-size:12.5px; margin-bottom:8px;"></div>
+
+    <div style="overflow:auto; border:1px solid var(--border); border-radius:8px; flex:1;">
+      <table class="data-table" style="margin:0;">
+        <thead>
+          <tr>
+            <th style="width:38px;">No</th>
+            <th>Nama Pengawas</th>
+            <th>Kecamatan</th>
+            <th>Username</th>
+            <th>Password Saat Ini</th>
+            <th style="width:105px; text-align:center;">Aksi</th>
+          </tr>
+        </thead>
+        <tbody id="tbodyDaftarPengawas">
+          <tr><td colspan="6" style="text-align:center; padding:18px;">Memuat data pengawas dari Supabase...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+  <!-- AREA CETAK RESMI (SESUAI DOKUMEN SUPERKOLAK) -->
+  <div id="printArea"></div>
+
+  <script>
+    // =========================================================================
+    // 1. KONFIGURASI SUPABASE & DATABASE SEKOLAH 12 KECAMATAN LOTENG
+    // =========================================================================
+    const SUPABASE_URL = 'https://hhoorzkhyascoxvkwofs.supabase.co';
+    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imhob29yemtoeWFzY294dmt3b2ZzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTUxOTc1MjYsImV4cCI6MjExMDc3MzUyNn0.4nij8F3aTRleCMcgr1RgYGa0cyZyR-YkkLJdzdfV-VI';
+    const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    const SEKOLAH_PER_KECAMATAN = {"Praya":["SD ISLAM DARUT TAUHID (69966648)","SD ISLAM HARAPAN BANGSA (69978621)","SD ISLAM MAHDHOTUL ULUM BUNUT BAOK (69734162)","SD IT Islam Al-Muslimun (69755769)","SD Islam Al-Karimah (50220267)","SD Islam Darul Azizi (50220554)","SD Islam Saadatuddarain (69757490)","SD MINHAJUSSALAM NW MANGGONG (50219648)","SD NEGERI 1 AIKMUAL (50201893)","SD NEGERI 1 BERAIM (50201849)","SD NEGERI 1 BODAK (50201848)","SD NEGERI 1 BUNUT BAOK (50201844)","SD NEGERI 1 GERUNUNG (50201854)","SD NEGERI 1 MONTONG TEREP (50201946)","SD NEGERI 1 PRAYA (50201967)","SD NEGERI 1 SEKUNYIT (50201962)","SD NEGERI 1 TENGARI (50201916)","SD NEGERI 1 WAKUL (50201911)","SD NEGERI 11 PRAYA (50201134)","SD NEGERI 2 AIKMUAL (50201910)","SD NEGERI 2 BODAK (50201935)","SD NEGERI 2 BUNUT BAOK (50201931)","SD NEGERI 2 GERUNUNG (50201927)","SD NEGERI 2 LENENG (50201104)","SD NEGERI 2 MONTONG TEREP (50201124)","SD NEGERI 2 PRAYA (50201066)","SD NEGERI 2 SEKUNYIT (50201059)","SD NEGERI 2 SEMAYAN (50201056)","SD NEGERI 2 WAKUL (50201077)","SD NEGERI 22 PRAYA (50201147)","SD NEGERI 3 AIK MUAL (50201076)","SD NEGERI 3 BODAK (50201179)","SD NEGERI 3 GERUNUNG (50201177)","SD NEGERI 3 PRAYA (50201166)","SD NEGERI 4 PRAYA (50201184)","SD NEGERI 5 PRAYA (50201144)","SD NEGERI 6 PRAYA (50201139)","SD NEGERI 7 PRAYA (50201138)","SD NEGERI AIKJA (50201161)","SD NEGERI BATUBANGKA (50200958)","SD NEGERI BEBIE (50200968)","SD NEGERI BILE PAIT (50200970)","SD NEGERI BOGAK (50200933)","SD NEGERI BUNDUA (50200928)","SD NEGERI BUNSALAK (50200921)","SD NEGERI BUSE (50200935)","SD NEGERI GERINTUK (50201037)","SD NEGERI GONJAK (50201050)","SD NEGERI Gelondong Baru (50201024)","SD NEGERI JAGO (50201043)","SD NEGERI KEKERE (50200989)","SD NEGERI KETEJER (50201011)","SD NEGERI KWANGRUNDUN (50201005)","SD NEGERI MAKAM (50201498)","SD NEGERI MERANG BARU (50201488)","SD NEGERI MERTAK TOMBOK (50201467)","SD NEGERI MERTAK UMBAK (50205134)","SD NEGERI PAOK TAWAH (50201461)","SD NEGERI PRAYITNA (50201559)","SD NEGERI Punik (50201554)","SD NEGERI SERENGAT (50201341)","SD NEGERI SUNDIL (50201359)","SD NEGERI TANGGAK (50201309)","SD NEGERI TELAGAWARU (50201306)","SD NEGERI TIWU ASEM (50201300)","SDI MUADZ BIN JABAL PREWO (70052802)","SDI Raudlatul Husna (69934581)","SDIT ANAK SHOLEH PRAYA (69880790)"],"Praya Barat":["SD ISLAM AL-MAARIF ULUMUT THOYYIBAH (69985518)","SD ISLAM DARUL MUKHLISIN NW (69961682)","SD ISLAM DARUL ULUM (70006844)","SD ISLAM MAARIF BATEAT MANGKUNG (50205013)","SD ISLAM PLUS ANJUMU AHLIL BILAD (YANJABI) (70030642)","SD N 1 BATUBEDUK (50201871)","SD N 2 PENUJAK (50201087)","SD N 3 BATUJAI (50201074)","SD N JABON BARAT (50201044)","SD NEGERI 1 BATUJAI (50201852)","SD NEGERI 1 BOMBAS (50201847)","SD NEGERI 1 JANGKIH JAWA (50201856)","SD NEGERI 1 Kateng (50201866)","SD NEGERI 1 MANGKUNG (50201953)","SD NEGERI 1 PENUJAK (50201971)","SD NEGERI 1 SETANGGOR (50201921)","SD NEGERI 2 BATU BEDUK (50201922)","SD NEGERI 2 BATUJAI (50201924)","SD NEGERI 2 JANGKIH JAWA (50201925)","SD NEGERI 2 KATENG (50201100)","SD NEGERI 2 MANGKUNG (50201105)","SD NEGERI 2 SETANGGOR (50201085)","SD NEGERI 3 PENUJAK (50201167)","SD NEGERI 4 BATUJAI (50201193)","SD NEGERI 4 PENUJAK (50201186)","SD NEGERI 5 PENUJAK (50201145)","SD NEGERI 6 PENUJAK (50201140)","SD NEGERI BANGKET MOLO (50201150)","SD NEGERI BAREBELIK (50201156)","SD NEGERI BILE TENGAK (50200973)","SD NEGERI BONDER (50200932)","SD NEGERI BUNKLOTOK (50200926)","SD NEGERI EMBOAN (50201053)","SD NEGERI EMBUNG TANGAR (50201031)","SD NEGERI KELEBUH (50200987)","SD NEGERI KELING (50200986)","SD NEGERI KELOKA (50201002)","SD NEGERI KENTAWANG (50201017)","SD NEGERI Ketangga (50201014)","SD NEGERI MASJURING (50201495)","SD NEGERI MENTOKOK (50201491)","SD NEGERI MONTONG WARU (50201438)","SD NEGERI OROK GENDANG (50201466)","SD NEGERI PETAK (50201551)","SD NEGERI PRAPAK (50201560)","SD NEGERI Pepekat (50201539)","SD NEGERI SELONG BELANAK (50201522)","SD NEGERI TAMPAH (50201354)","SD NEGERI TANAK RARANG (50201311)","SD NEGERI TOMANG OMANG (50201314)","SD NEGERI TONGKER (50201329)","SD QURAN DARUL HIJRAH NW (70056494)","SDI ABDI NUSANTARA (70047273)","SDI AL-MASYHURIYAH (69956803)","SDI ISHLAHUL AQWAMUL ULUM (69980927)","SDIT FATIHUL HADI BOTIK (70001748)","SDIT MUTIARA  HATI (70039082)","SDIT YARLA BATUJAI (70032901)"],"Praya Barat Daya":["SD ISLAM AL-MAARIF AS-SALAFIYAH KUNCI (69972903)","SD ISLAM TERPADU AL MUKHTARIYYAH (69786940)","SD NEGERI 1 BATU JANGKIH (50201923)","SD NEGERI 1 DAREK (50201843)","SD NEGERI 1 KABUL (50200997)","SD NEGERI 1 KELANJUR (50205129)","SD NEGERI 1 MONTONG SAPAH (50201441)","SD NEGERI 1 RANGGAGATA (50205130)","SD NEGERI 1 UNGGA (50201912)","SD NEGERI 2 BATU JANGKIH (50201075)","SD NEGERI 2 DAREK (50201930)","SD NEGERI 2 KELANJUR (50201172)","SD NEGERI 2 RANGGAGATA (50201181)","SD NEGERI 2 UNGGA (50201078)","SD NEGERI 3 DAREK (50201192)","SD NEGERI 3 UNGGA (50201164)","SD NEGERI 4 DAREK (50201146)","SD NEGERI 4 PLAMBIK (BAGEK DEWE) (50201185)","SD NEGERI BATU BOLONG (50201194)","SD NEGERI BATU RENONG (50201169)","SD NEGERI BEBERIK-PLAMBIK (50200967)","SD NEGERI GERINTUK (50201036)","SD NEGERI Gerunung (50222383)","SD NEGERI KANGAS (50219604)","SD NEGERI KELAMBI (50201120)","SD NEGERI KENDING SAMPI (50201943)","SD NEGERI KUMBAK (50201063)","SD NEGERI MENTOKAN (50201178)","SD NEGERI NGABOK (50201449)","SD NEGERI PAMPANG (50201101)","SD NEGERI PANDAN TINGGANG (50201853)","SD NEGERI PLAMBIK (50201968)","SD NEGERI PONDOK DALAM (50201126)","SD NEGERI Pandan Sari (69786358)","SD NEGERI SAPE (50201518)","SD NEGERI SEMAYE (50201520)","SD NEGERI SUARE (50219605)","SD NEGERI TENARU (50201141)","SD NEGERI TOROK AIK BELEK (50205135)","SD NEGERI TUDUH (50201327)","SDI AL-HUDA MAARIF (70042929)","SDI BUMI DAMAI MONTONG DANGAH (70050116)","SDI MIFTAHUSSALAM AR RIDWANY (70037917)","SDIT SIRAJUL MUTTAQIN (69990272)","SDN Montong Ajan (50201948)","SDN RENTUNG (50219606)","SDN SELANGIT (50201067)","SDTQ RAHMATULLAH AL MAARIF (70012171)"],"Praya Tengah":["SD N 1 LAJUT (50201859)","SD N 1 SANGGENG (50201502)","SD NEGERI 1 BATUNYALA (50201851)","SD NEGERI 1 JONTLAK (50201868)","SD NEGERI 1 JURANG JALER (50201867)","SD NEGERI 1 LELONG (50201839)","SD NEGERI 1 LENDANG KUNYIT (50201972)","SD NEGERI 1 PEJANGGIK (50201942)","SD NEGERI 1 PENGADANG (50201955)","SD NEGERI 2 BATUNYALA (50201938)","SD NEGERI 2 JONTLAK (50201131)","SD NEGERI 2 JURANG JALER (50201102)","SD NEGERI 2 LELONG (50201090)","SD NEGERI 2 LENDANG KUNYIT (50201089)","SD NEGERI 2 PEJANGGIK (50201109)","SD NEGERI 2 PENGADANG (50201107)","SD NEGERI 2 SANGGENG (50201061)","SD NEGERI 3 BATUNYALA (50201073)","SD NEGERI 3 BERAIM (50201197)","SD NEGERI 3 PEJANGGIK (50201168)","SD NEGERI 9 PRAYA (50201136)","SD NEGERI DAKUNG (50200950)","SD NEGERI EMBUNG BELEK (50201035)","SD NEGERI GERANTUNG (50201023)","SD NEGERI GERENENG (50201022)","SD NEGERI GUNTUR (50201048)","SD NEGERI JORONG (50201021)","SD NEGERI KARANG BARU (50200996)","SD NEGERI MEKA (50201494)","SD NEGERI PENIMPOH (50201541)","SD NEGERI SELEBUNG (50201524)","SD NEGERI SEREWA PRAYA TENGAH (50201340)","SD NEGERI SESAKE (50201339)","SD NEGERI TAMPAR AMPAR (50201352)","SD Negeri 2 Beraim (50201937)","SDIT AL KHAIRAT (70040637)"],"Praya Timur":["SD NEGERI 1 BELEKA (50201850)","SD NEGERI 1 GANTI (50201841)","SD NEGERI 1 MARONG (50201951)","SD NEGERI 1 MUJUR (50201945)","SD NEGERI 1 SENGKERANG (50201958)","SD NEGERI 1 Semoyang (50201959)","SD NEGERI 2 BELEKA (50201936)","SD NEGERI 2 GANTI (50201026)","SD NEGERI 2 MARONG (50201129)","SD NEGERI 2 MUJUR (50201122)","SD NEGERI 2 SEMOYANG (50201070)","SD NEGERI 3 BELEKA (50201055)","SD NEGERI 3 MARONG (50201173)","SD NEGERI 3 MUJUR (50201171)","SD NEGERI BATURINTANG (50200957)","SD NEGERI BEBILE (50200969)","SD NEGERI BELEKA (50200979)","SD NEGERI BERANGAH (50205128)","SD NEGERI BILELANDO (50200971)","SD NEGERI Bagik Kerongkong (50201155)","SD NEGERI KELANJUH (50200988)","SD NEGERI KELONGKONG (50201003)","SD NEGERI KIDANG (50201010)","SD NEGERI KULEM (50201009)","SD NEGERI LENGKAH (50201195)","SD NEGERI LOKON (50201499)","SD NEGERI Landah (50200985)","SD NEGERI Legu (50201482)","SD NEGERI MENGKUDU (50201492)","SD NEGERI MENYOSOK (50201489)","SD NEGERI NYAMPE PRAYA TIMUR (50201188)","SD NEGERI NYANGGET (50201183)","SD NEGERI PENANGSAK (50201545)","SD NEGERI PERAS (50201538)","SD NEGERI SEMOYONG (50201096)","SD NEGERI SEPAKAT (50201344)","SD NEGERI SONGKOK (50201349)","SD NEGERI SOSAK (50201350)","SD NEGERI Sukaraja (50201362)","SD NEGERI TELOK (50201182)","SDIT MAHFUZHOTUL QURAN (70010405)","SDIT NURUL ANBIYA NW (70035842)","SDIT NURUL YASIN (70046531)"],"Jonggat":["SD N 1 NYEROT (50201944)","SD N 1 PERINA (50201970)","SD N 1 SUKARARA (50201918)","SD N 1 UBUNG (50201913)","SD N MERTAK (50201487)","SD NEGERI 1 BAREJULAT (50201872)","SD NEGERI 1 BONJERUK (50201846)","SD NEGERI 1 BUNKATE (50201845)","SD NEGERI 1 GEMEL (50201840)","SD NEGERI 1 JELANTIK (50201870)","SD NEGERI 1 LABULIA (50201860)","SD NEGERI 1 PENGENJEK (50201956)","SD NEGERI 1 PUYUNG (50201965)","SD NEGERI 2 BAREJULAT (50201908)","SD NEGERI 2 BONJERUK (50201933)","SD NEGERI 2 BUNKATE (50201932)","SD NEGERI 2 GEMEL (50201928)","SD NEGERI 2 JELANTIK (50201907)","SD NEGERI 2 LABULIA (50201093)","SD NEGERI 2 NYEROT (50201121)","SD NEGERI 2 PENGENJEK (50201106)","SD NEGERI 2 PERINA (50201069)","SD NEGERI 2 PUYUNG (50201064)","SD NEGERI 2 SUKARARA (50201084)","SD NEGERI 2 UBUNG (50201079)","SD NEGERI 3 BAREJULAT (50200966)","SD NEGERI 3 NYEROT (50201170)","SD NEGERI 3 PUYUNG (50201180)","SD NEGERI AIK AMPAT (50201162)","SD NEGERI AIK ARA (50201148)","SD NEGERI BATU ENTEK (50200963)","SD NEGERI BATU TINGGANG (50200959)","SD NEGERI BATUTULIS (50200956)","SD NEGERI BEBER (50200953)","SD NEGERI BEJELO (50200981)","SD NEGERI BEREMBENG (50200976)","SD NEGERI BILAKERE (50200975)","SD NEGERI BUN SUMPAK (50200923)","SD NEGERI BUNCALANG (50200929)","SD NEGERI BUNPEDEK (50200919)","SD NEGERI BUNSAMBANG (50200922)","SD NEGERI BURHANA (50200934)","SD NEGERI DASAN BENGKEL (50200943)","SD NEGERI DASAN KETUJUR (50200941)","SD NEGERI DASAN SEBELEK (50200938)","SD NEGERI Dasan Lekong (50200939)","SD NEGERI EMBUNG DUDUK (50201034)","SD NEGERI GALANG BULAN (50201029)","SD NEGERI JERENENG (50201039)","SD NEGERI LOANG TUNA (50201485)","SD NEGERI MANGGONG (50201497)","SD NEGERI OTAK DESA (50201464)","SD NEGERI Peresak (50201535)","SD NEGERI SELANGLET (50201526)","SD NEGERI SETUMBAK (50201337)","SD NEGERI SULIN (50201361)","SD NEGERI SURABAYA (50201357)","SD NEGERI TANDEK (50201310)","SD NEGERI TIMUK GAWAH (50201301)","SD NEGERI WAKER (50201323)","SDIT GENERASI MUSLIM CENDEKIA (69920757)","SDN DASAN BARU (50200948)"],"Pringgarata":["SD ISLAM DARUL HUDA (70005916)","SD Islam Assalam Al-Islamy (69899217)","SD Islam Nurul Jihad (69900094)","SD NEGERI 1 MEDAS (50201950)","SD NEGERI 1 PENJANGKA (50201957)","SD NEGERI 1 PRINGGARATA (50201966)","SD NEGERI 1 SEPAKEK (50201939)","SD NEGERI 2 MEDAS (50201128)","SD NEGERI 2 PENJANGKA (50201088)","SD NEGERI 2 PRINGGARATA (50201065)","SD NEGERI 2 SEPAKEK (50201086)","SD NEGERI ARJANGKA (50201158)","SD NEGERI BAGU (50201154)","SD NEGERI BILEBANTE (50200972)","SD NEGERI Banteng Keselet (50201132)","SD NEGERI CERORONG (50200936)","SD NEGERI DASAN BARU JABON (50200945)","SD NEGERI DASAN BARU NON INPRES (50200946)","SD NEGERI Dasan Baru Inpres (50200944)","SD NEGERI ESOT (50201030)","SD NEGERI GUNUNG AGUNG (50201047)","SD NEGERI JURANG SATE (50201020)","SD NEGERI KARANG JANGKONG (50200995)","SD NEGERI KARANG KEBON (50200994)","SD NEGERI KEKALEK (50200990)","SD NEGERI LENDANG KELOR (50201478)","SD NEGERI MENEMENG (50201493)","SD NEGERI MONTONG ARA (50201437)","SD NEGERI MURBAYA (50201434)","SD NEGERI PEMEPEK (50201452)","SD NEGERI PIDADA (50201564)","SD NEGERI PRINGGARATA BARAT (50201557)","SD NEGERI PRINGGARATA TIMUR (50201556)","SD NEGERI PUSPALAYA (50201553)","SD NEGERI RARUNG (50201533)","SD NEGERI REPOK PIDENDANG (50201511)","SD NEGERI REPOK SINTUNG (50201509)","SD NEGERI REPOK TUNJANG (50201508)","SD NEGERI SEDAU TIMUR (50201531)","SD NEGERI SEMPOJA (50201432)","SD NEGERI SINTUNG BARAT (50201335)","SD NEGERI SINTUNG TIMUR (50201332)","SD NEGERI SISIK BARAT (50201348)","SD NEGERI SISIK TIMUR (50201920)","SD NEGERI TAMAN BALI (50201355)","SD NEGERI TAPON (50201307)","SDI AL AZHAR (70045509)","SDI ARIF RAHMAN HAKIM SELAKAN (70030738)","SDI BIRRUL WALIDAINIL FATHI NW (70035328)","SDIT AL AMIIN (70058197)","SDN Pemepek Barat (69900095)","SDN SALAM SUKUR (50201504)"],"Batukliang":["SD ISLAM AL YAUM SONGGOK (69786702)","SD ISLAM BABUSSALAM SANGKAWANA (69755768)","SD N 1 SANGKAWANA (50201963)","SD N BATU LUMBUNG (50200961)","SD N MERTAK KESAMBIK (50201486)","SD N MERTAK WARENG (50201448)","SD N SAPIT (50201532)","SD NEGERI 1 LENDANG TAMPEL (50201476)","SD NEGERI 1 MANTANG (50201952)","SD NEGERI 1 SELEBUNG (50201960)","SD NEGERI 1 TUNJANG (50201914)","SD NEGERI 2 LENDANG TAMPEL (50201103)","SD NEGERI 2 MANTANG (50201130)","SD NEGERI 2 SANGKAWANA (50201060)","SD NEGERI 2 SELEBUNG (50201057)","SD NEGERI 2 TUNJANG (50201080)","SD NEGERI 3 MANTANG (50201174)","SD NEGERI Aik Darek (50201163)","SD NEGERI BAJUR (50201153)","SD NEGERI BARABALI (50201054)","SD NEGERI BEBER (50200954)","SD NEGERI BENENG (50200978)","SD NEGERI DASAN BARU TAMPAKSIRING (50205131)","SD NEGERI DASAN LEKONG (50200940)","SD NEGERI GUNUNG AMUK (50201051)","SD NEGERI KEMBANG KERANG (50201004)","SD NEGERI LENDANG DODA (50201479)","SD NEGERI LENDANG TERONG (50201474)","SD NEGERI MERTAK PAOK (50201468)","SD NEGERI MONTONG GERIA (50201442)","SD NEGERI Otak Desa (50201465)","SD NEGERI PAGUTAN (50201463)","SD NEGERI PAJANGAN (50201462)","SD NEGERI PAOK KUNING (50201460)","SD NEGERI PENAKAK (50201548)","SD NEGERI PENYENGAK (50201540)","SD NEGERI PERESAK (50201536)","SD NEGERI PONDOK PANDE (50201563)","SD NEGERI REPOK PUYUNG (50201510)","SD NEGERI SADE (50201505)","SD NEGERI SUBAHNALA (50201363)","SD NEGERI SURABAYA (50201358)","SD NEGERI TAMPAK SIRING (50201353)","SD NEGERI TANAK EMBANG (50201312)","SD NEGERI TOJONG-OJONG (50201199)","SD NEGERI TUNDUNG (50201325)","SDIT ZEINTA CENDIKIA (70032554)","SDN LEKONG MADI (50201481)"],"Batukliang Utara":["SD ISLAM NW CEKING (60729242)","SD ISLAM TERPADU AN NUR (70047781)","SD NEGERI AIK BERIK (50201149)","SD NEGERI DAPUR (50200949)","SD NEGERI GELOGOR (50201025)","SD NEGERI GUBUK MAKAM (50201049)","SD NEGERI JENGGUAR (50201040)","SD NEGERI KARANG SIDEMEN (50200993)","SD NEGERI KETANGGA (50201013)","SD NEGERI KUMBAK (50201008)","SD NEGERI LANTAN (50201500)","SD NEGERI LINGKOK LIMA (50201471)","SD NEGERI MAS MAS (50201496)","SD NEGERI MESORAN (50201447)","SD NEGERI PEMASIR (50201453)","SD NEGERI PEMOTOH BARAT (50201433)","SD NEGERI PEMOTOH TENGAK (50201568)","SD NEGERI PERSIL (50201550)","SD NEGERI PETIKUS (50201565)","SD NEGERI RANGKEP (69761923)","SD NEGERI REBAN BURUNG (50201515)","SD NEGERI REPUK SINTUNG BARAT (50201334)","SD NEGERI SEGANTENG (50201530)","SD NEGERI SEKEDEK (50201529)","SD NEGERI SELAK AIK (50201527)","SD NEGERI SELEWAT (50201523)","SD NEGERI SENURUS (50201346)","SD NEGERI SETILING (50201338)","SD NEGERI TANAK BEAK (50201331)","SD NEGERI TANAK BENGAN (50201330)","SD NEGERI TERATAK (50201303)","SDI AS-SYAFII NW (69982082)","SDI BINTANG SINAR LIMA (70056996)","SDI NURUL MUFIDAH NW (69888367)","SDIT AL-MUADZININ (70005062)","SDIT AS-SALAM PRAMPUAN (69943898)","SDN GUNUNG BOROK (50219768)","SDN REPOK MONTE (69770317)","SDN RERANTEK (69761922)","SDN TAMBING KEKEQ (60729225)"],"Kopang":["SD AL-MAARIF NU AL-KHAIRI (70035754)","SD ISLAM AD-DUHA (70025019)","SD ISLAM AZ- ZIKRI (69787079)","SD ISLAM NURUL MUBIN NW IWAN BONGKOT (70005814)","SD NEGERI 1 DARMAJI (50201842)","SD NEGERI 1 KOPANG (50201862)","SD NEGERI 1 MONTONG GAMANG (50201947)","SD NEGERI 1 Monggas (50201949)","SD NEGERI 1 Peseng (50201969)","SD NEGERI 2 DARMAJI (50201929)","SD NEGERI 2 KOPANG (50201095)","SD NEGERI 2 MONGGAS (50201127)","SD NEGERI 2 MONTONG GAMANG (50201125)","SD NEGERI 2 Peseng (50201068)","SD NEGERI 3 KOPANG (50201175)","SD NEGERI 4 KOPANG (50201189)","SD NEGERI BARE ELEH (50200984)","SD NEGERI BEBAK (50200955)","SD NEGERI BISOK BOKAH (50200952)","SD NEGERI BUAL (50200931)","SD NEGERI Bebuak (50200983)","SD NEGERI DASAN BARU (50200947)","SD NEGERI DASAN JONTAK (50200942)","SD NEGERI EMBUNG KARUNG (50201033)","SD NEGERI GUNUNG GATEP (50201046)","SD NEGERI JURIT (50200998)","SD NEGERI KARANG TENGAK (50200992)","SD NEGERI KENAWA (50201018)","SD NEGERI KWANG RASE (50201006)","SD NEGERI KWANGPATI (50201007)","SD NEGERI LENDANG ARA (50201480)","SD NEGERI LENDANG TELAGA (50201475)","SD NEGERI LINGKUNG (50201469)","SD NEGERI MONTONG BUAK (50201443)","SD NEGERI MONTONG TANGGAK (50201440)","SD NEGERI MUMBANG (50201187)","SD NEGERI Montong Batu (50201445)","SD NEGERI Muncan (50201435)","SD NEGERI PERESAK BEBUAK (50201537)","SD NEGERI PETEMON (50201566)","SD NEGERI PRESAK DARMAJI (50201558)","SD NEGERI PUYUNG (50201552)","SD NEGERI Penimpoh (50201542)","SD NEGERI RENGGUNG (50201514)","SD NEGERI RENGKAK (50201513)","SD NEGERI REPOK BIJANG (50201512)","SD NEGERI RETOT (50201507)","SD NEGERI SEMALANG (50201521)","SD NEGERI SEMPARU (50201501)","SD NEGERI Sombek (50201360)","SD NEGERI WAJAGESENG (50201324)","SEKOLAH DASAR AL-BAJURI BAJUR (70064521)"],"Janapria":["SD ALAM BUSTANUL ARIFIN (70003988)","SD ISLAM IHSAN AL-BAITY (70029516)","SD ISLAM TERPADU SEMUDANE AL-FAZRI (70030248)","SD IT AR-RODHYIEN (70057373)","SD N MONTONG BAGEK (50201446)","SD N SENGKEREK (50201347)","SD NEGERI 1 BAKAN (50201892)","SD NEGERI 1 JANAPRIA (50201855)","SD NEGERI 1 JEMBE (50201869)","SD NEGERI 1 KEREMBONG (50201864)","SD NEGERI 1 LANGKO (50201858)","SD NEGERI 1 LEKOR (50201857)","SD NEGERI 1 PENDEM (50201941)","SD NEGERI 1 SELEBUNG (50201961)","SD NEGERI 2 BAKAN (50201909)","SD NEGERI 2 BERANGAH (50201142)","SD NEGERI 2 JANAPRIA (50201926)","SD NEGERI 2 JEMBE (50201569)","SD NEGERI 2 KEREMBONG (50201098)","SD NEGERI 2 Langko (50201092)","SD NEGERI 2 Lekor (50201091)","SD NEGERI 2 PENDEM (50201108)","SD NEGERI 2 SELEBUNG (50201058)","SD NEGERI Ambat (50201160)","SD NEGERI BANGKA (50201152)","SD NEGERI BATU KEMBAR (50200962)","SD NEGERI BERANI (50200977)","SD NEGERI BILE PENANGGAK (50200974)","SD NEGERI DASAN TERES (50205132)","SD NEGERI DURIAN (50200951)","SD NEGERI JANGGAWANA (50201028)","SD NEGERI JANGKA (50201042)","SD NEGERI JANGO (50205133)","SD NEGERI JURING (50201001)","SD NEGERI KEBON SANGKOR (50200991)","SD NEGERI KEMIRI (50201019)","SD NEGERI KENYALU (50201016)","SD NEGERI LINGKOK BUNUT (50201472)","SD NEGERI LINGKUK BUAK (50201470)","SD NEGERI LIWUNG (50201483)","SD NEGERI LOANG MAKA (50201484)","SD NEGERI MENYIUH (50201490)","SD NEGERI MONTONG TANGIS (50201439)","SD NEGERI NUNANG (50201451)","SD NEGERI PEMANTEK (50201455)","SD NEGERI PENAMBONG (50201547)","SD NEGERI PENANDAK (50201546)","SD NEGERI PERIGI (50201549)","SD NEGERI PRAKO (50201561)","SD NEGERI SADAH (50201506)","SD NEGERI SONDO (50201919)","SD NEGERI STUTA (50201364)","SD NEGERI TAKEN AKEN (50201356)","SD NEGERI TIBU SISOK (50201302)","SDIT AL-MAHDIYAH (70024061)","SEKOLAH DASAR ISLAM HUBBUL WALIDAIN (70063207)"],"Pujut":["SD ISLAM AL-MAARIF NU KERAMAT (69982631)","SD MANDALIKA INTERCULTURAL (70002714)","SD N 1 REMBITAN (50201964)","SD N 2 REMBITAN (50201062)","SD N 2 SENGKOL (50201072)","SD N 3 REMBITAN (50220625)","SD N 4 SENGKOL (50201165)","SD N AREGULING (50201159)","SD N PEMASAH (50201454)","SD NEGERI 1 KAWO (50201865)","SD NEGERI 1 KETARA (50201863)","SD NEGERI 1 KUTA (50201861)","SD NEGERI 1 SENGKOL (50201940)","SD NEGERI 1 TANAK AWU (50201917)","SD NEGERI 1 TERUWAI (50201915)","SD NEGERI 2 KAWO (50201099)","SD NEGERI 2 KETARA (50201097)","SD NEGERI 2 TANAK AWU. (50201083)","SD NEGERI 2 TERUWAI (50201081)","SD NEGERI 3 KAWO (50201176)","SD NEGERI 3 SENGKOL (50201196)","SD NEGERI 4 KAWO (50201190)","SD NEGERI 5 SENGKOL (50201143)","SD NEGERI AWANG (50201157)","SD NEGERI BARELANTAN (50200965)","SD NEGERI BAREPAOK (50200964)","SD NEGERI BATU PEDANG (50200960)","SD NEGERI BEDUS (50200982)","SD NEGERI BELAR (50200980)","SD NEGERI BUMBANG (50200930)","SD NEGERI BUNGAWAN (50200927)","SD NEGERI BUNMAS (50200925)","SD NEGERI BUNPETUNG (50200920)","SD NEGERI BUNUT BAOK (50200924)","SD NEGERI Bangkang (50201151)","SD NEGERI DONDAK (50200937)","SD NEGERI EMBUNG RUNGKAS (50201032)","SD NEGERI GANTANG (50201027)","SD NEGERI GERUPUK (50201038)","SD NEGERI Gilik (50201052)","SD NEGERI JELATENG (50201041)","SD NEGERI KETANGAN (50201015)","SD NEGERI LENDANG LANTAN (50201477)","SD NEGERI LENTEK (50201473)","SD NEGERI MONYEL (50201436)","SD NEGERI NGOLANG (50201450)","SD NEGERI PAPAK (50201459)","SD NEGERI PASUNG (50201458)","SD NEGERI PEJERUK (50201457)","SD NEGERI PONGOS (50201562)","SD NEGERI Pengembur (50201544)","SD NEGERI Pengengat (50201543)","SD NEGERI Rajan (50201534)","SD NEGERI SAMBAK DUI (50201503)","SD NEGERI SANGGENG (50201516)","SD NEGERI SEKEMBANG (50201528)","SD NEGERI SELAWANG (50201525)","SD NEGERI SEMPALAN (50201519)","SD NEGERI SEMUNDAL (50201365)","SD NEGERI SERENANG (50201343)","SD NEGERI SERENENG (50201342)","SD NEGERI SEWAR (50201336)","SD NEGERI Sangi (50201517)","SD NEGERI TAMPING (50201351)","SD NEGERI TANSANG-ANSANG (50201308)","SD NEGERI TELUK BULAN (50201305)","SD NEGERI TEMPIT (50201304)","SD NEGERI TOLOT-TOLOT (50201313)","SD NEGERI TONJER (50201315)","SD NEGERI TUBAN (50201328)","SD NEGERI TUMPAK (50201326)","SD NEGERI WARENG (50201322)","SD NURUL IJTIHAD (69733964)","SD PLUS MANDALIKA (69975256)","SDIT DARUL AKBAR (70001342)","SDN 2 KUTA (50201094)","SDN Montong Gerantung (69894290)"]};
+
+    const KECAMATAN_LOTENG = [
+      "Praya", "Praya Barat", "Praya Barat Daya", "Praya Tengah", "Praya Timur",
+      "Jonggat", "Pringgarata", "Batukliang", "Batukliang Utara",
+      "Kopang", "Janapria", "Pujut"
+    ];
+
+    const DAFTAR_BULAN = [
+      "Januari", "Februari", "Maret", "April", "Mei", "Juni",
+      "Juli", "Agustus", "September", "Oktober", "November", "Desember"
+    ];
+
+    // DATA BUTIR PRAOBSERVASI (20 BUTIR — SESUAI DOKUMEN ASLI)
+    const PRA_ITEMS = [
+      { no: 1, komponen: "Identitas RPP/MA", opsional: false, indikator: "Lengkap: mata pelajaran, jenjang, kelas, materi pokok, alokasi waktu dll" },
+      { no: 2, komponen: "Identifikasi Murid", opsional: true, indikator: "Terdapat: Identifikasi kesiapan murid sebelum belajar, seperti pengetahuan awal, minat, latar belakang, dan kebutuhan belajar, serta aspek lainnya." },
+      { no: 3, komponen: "Materi Pembelajaran", opsional: true, indikator: "Jelas: Jenis pengetahuan yang akan dicapai, relevansi dengan kehidupan nyata, struktur materi, tingkat kesulitan, integrasi nilai karakter dsb." },
+      { no: 4, komponen: "Dimensi Profil Lulusan", opsional: false, indikator: "Terdapat Dimensi Profil Lulusan yang ditentukan selaras dengan tujuan pembelajaran dan kegiatan yang dilakukan." },
+      { no: 5, komponen: "Capaian Pembelajaran", opsional: true, indikator: "Terdapat rumusan Capaian Pembelajaran (CP) terbaru dari BSKAP" },
+      { no: 6, komponen: "Lintas Disiplin Ilmu", opsional: true, indikator: "Terdapat keterkaitan disiplin ilmu dan/atau mata pelajaran yang relevan dengan tujuan pembelajaran" },
+      { no: 7, komponen: "Tujuan Pembelajaran (TP)", opsional: false, indikator: "Mencakup kompetensi dan konten pada ruang lingkup materi dengan menggunakan kata kerja operasional yang relevan" },
+      { no: 8, komponen: "Topik Pembelajaran", opsional: true, indikator: "Terdapat topik pembelajaran yang relevan dengan CP dan TP" },
+      { no: 9, komponen: "Praktik Pedagogis", opsional: false, indikator: "Tergambarkan: kesesuaian model, pendekatan, strategi, metode, atau teknik pada kegiatan pembelajaran" },
+      { no: 10, komponen: "Kemitraan Pembelajaran", opsional: true, indikator: "Kolaborasi antar/lintas mata pelajaran dalam dan/atau luar sekolah" },
+      { no: 11, komponen: "Lingkungan Pembelajaran", opsional: false, indikator: "Lingkungan belajar yang ingin dikembangkan dalam budaya belajar, ruang fisik dan/atau ruang virtual" },
+      { no: 12, komponen: "Pemanfaatan Teknologi", opsional: true, indikator: "Pemanfaatan teknologi yang dituliskan sudah tergambar pada langkah pembelajaran dan/atau asesmen pembelajaran." },
+      { no: 13, komponen: "Kegiatan Awal", opsional: false, indikator: "Kegiatan awal yang dituliskan meliputi orientasi yang bermakna, apersepsi yang kontekstual, dan motivasi, memuat prinsip pembelajaran mendalam berupa berkesadaran, bermakna, dan/atau menggembirakan sudah tergambar pada setiap pengalaman belajar dan perencanaan pembelajaran sudah mengakomodir pengalaman belajar sesuai karakteristik murid" },
+      { no: 14, komponen: "Kegiatan Inti", opsional: false, indikator: "Langkah pembelajaran dapat memfasilitasi murid untuk merasakan pengalaman belajar MEMAHAMI (mengonstruksi pengetahuan, menghubungkan pengetahuan baru dengan yang lama, mengaitkan konteks nyata, memberi ruang eksplorasi & kolaborasi, menanamkan nilai moral & karakter) dan/atau MENGAPLIKASI (menghubungkan konsep baru, menerapkan dalam situasi nyata, eksplorasi lanjut, berpikir kritis & mencari solusi inovatif) dan/atau MEREFLEKSI (evaluasi diri, regulasi emosi, motivasi belajar, strategi berpikir, metakognisi)." },
+      { no: 15, komponen: "Kegiatan Akhir", opsional: false, indikator: "Langkah pembelajaran dapat memfasilitasi tindakan saling MEMULIAKAN antara guru-murid, murid-guru, dan murid-murid (verbal maupun nonverbal)" },
+      { no: 16, komponen: "Asesmen Awal", opsional: false, indikator: "Asesmen awal pembelajaran dilaksanakan untuk mengetahui kesiapan belajar (emosi, mental, pengetahuan awal, kebutuhan belajar)" },
+      { no: 17, komponen: "Asesmen Proses", opsional: false, indikator: "Asesmen selama proses pembelajaran dilaksanakan sesuai rencana untuk memantau perkembangan, memberi umpan balik, dengan beragam teknik" },
+      { no: 18, komponen: "Asesmen Akhir", opsional: false, indikator: "Asesmen hasil pembelajaran direncanakan untuk mengukur pencapaian kompetensi dengan berbagai cara (tes, portofolio, proyek, presentasi, dsb.)" },
+      { no: 19, komponen: "Rubrik Penilaian", opsional: false, indikator: "Terdapat kriteria ketercapaian tujuan pembelajaran dari masing-masing tujuan pembelajaran yang akan dinilai" },
+      { no: 20, komponen: "Lembar Kerja Murid", opsional: true, indikator: "Lembar kerja murid selaras dengan tujuan pembelajaran dan kegiatan pembelajaran" }
+    ];
+
+    // DATA BUTIR OBSERVASI SKOR 1-4 (BUTIR 1-8 — WAJIB SKOR, CATATAN PILIHAN)
+    const OBS_SKOR_ITEMS = [
+      { no: 1, bagian: "A. PERENCANAAN DI KELAS", aspek: "Apersepsi & Motivasi", indikator: "Guru mengaitkan pembelajaran dengan pengalaman sehari-hari, memberi motivasi yang menggembirakan" },
+      { no: 2, bagian: "A. PERENCANAAN DI KELAS", aspek: "Penyampaian Tujuan", indikator: "Guru menyampaikan tujuan pembelajaran dengan jelas" },
+      { no: 3, bagian: "B. PELAKSANAAN PEMBELAJARAN", aspek: "Pengalaman Belajar", indikator: "MEMAHAMI (mengonstruksi pengetahuan, menghubungkan pengetahuan baru dengan yang lama, mengaitkan konteks nyata, memberi ruang eksplorasi & kolaborasi, menanamkan nilai moral & karakter) dan/atau MENGAPLIKASI (menghubungkan konsep baru, menerapkan dalam situasi nyata, eksplorasi lanjut, berpikir kritis & mencari solusi inovatif) dan/atau MEREFLEKSI (evaluasi diri, regulasi emosi, motivasi belajar, strategi berpikir, metakognisi)." },
+      { no: 4, bagian: "C. PENGELOLAAN KELAS", aspek: "Suasana Belajar", indikator: "Suasana kelas aman, nyaman, saling menghargai" },
+      { no: 5, bagian: "C. PENGELOLAAN KELAS", aspek: "Pemanfaatan Teknologi", indikator: "Teknologi digunakan untuk memperkuat pembelajaran" },
+      { no: 6, bagian: "D. ASESMEN", aspek: "Asesmen Awal", indikator: "Dilakukan untuk mengetahui kesiapan belajar (emosi, mental, pengetahuan awal, kebutuhan murid)" },
+      { no: 7, bagian: "D. ASESMEN", aspek: "Asesmen Proses", indikator: "Dilakukan untuk memantau perkembangan, memberi umpan balik (guru <-> murid) dengan beragam teknik" },
+      { no: 8, bagian: "D. ASESMEN", aspek: "Asesmen Akhir", indikator: "Mengukur pencapaian kompetensi dengan teknik yang sesuai (tes, portofolio, proyek, presentasi, dsb.)" }
+    ];
+
+    // DATA BUTIR IMPLEMENTASI PEMBELAJARAN MENDALAM (NOMOR 9 - 20 — BERSIH TANPA LABEL OPSIONAL, DROPDOWN ADA / TIDAK ADA)
+    const OBS_PM_ITEMS = [
+      { no: 9, sub: "1. Keselarasan", aspek: "Implementasi perencanaan selaras dengan perencanaan pembelajaran (Kegiatan Awal, Kegiatan Inti dan Kegiatan Penutup pembelajaran)" },
+  { no: 10, sub: "1. Keselarasan", aspek: "Upaya mencapai tujuan pembelajaran menuju pencapaian Dimensi Profil Lulusan selaras dengan perencanaan, atau disesuaikan dengan konteks kebutuhan belajar siswa" },
+  { no: 11, sub: "2. Kerangka Pembelajaran", aspek: "Strategi pembelajaran diimplementasikan sesuai perencanaan / dimodifikasi sesuai kebutuhan / tantangan dapat terlewati untuk mencapai CP" },
+  { no: 12, sub: "2. Kerangka Pembelajaran", aspek: "Lingkungan belajar tergambar dalam langkah dan/atau asesmen pembelajaran" },
+  { no: 13, sub: "2. Kerangka Pembelajaran", aspek: "Kemitraan pembelajaran tergambar dalam langkah dan/atau asesmen pembelajaran" },
+  { no: 14, sub: "2. Kerangka Pembelajaran", aspek: "Pemanfaatan teknologi tergambar dalam langkah dan/atau asesmen pembelajaran" },
+  { no: 15, sub: "3. Langkah Pembelajaran", aspek: "Guru dan murid saling MEMULIAKAN (bahasa verbal maupun nonverbal)" },
+  { no: 16, sub: "3. Langkah Pembelajaran", aspek: "MEMAHAMI: a. Menghubungkan pengetahuan baru dengan pengetahuan lama b. Menstimulasi proses berpikir c. Menghubungkan dengan konteks nyata d. Eksploratif & kolaboratif e. Menanamkan nilai moral & karakter" },
+  { no: 17, sub: "3. Langkah Pembelajaran", aspek: "MENGAPLIKASI: a. Menghubungkan konsep baru dengan pengetahuan sebelumnya b. Menerapkan dalam situasi nyata/bidang lain c. Eksplorasi lanjut d. Berpikir kritis & solusi inovatif" },
+  { no: 18, sub: "3. Langkah Pembelajaran", aspek: "MEREFLEKSI: a. Motivasi belajar b. Evaluasi diri c. Strategi berpikir d. Metakognisi e. Regulasi emosi" },
+  { no: 19, sub: "3. Langkah Pembelajaran", aspek: "Prinsip pembelajaran mendalam (berkesadaran, bermakna, menggembirakan) tergambar pada setiap pengalaman belajar" },
+  { no: 20, sub: "3. Langkah Pembelajaran", aspek: "Praktik pembelajaran mengakomodir karakteristik peserta didik (usia, perkembangan, kemampuan, minat, gaya belajar, dll.)" },
+    ];
+
+    // DATA PERTANYAAN PASCAOBSERVASI (5 BUTIR)
+    const PASCA_ITEMS = [
+      { no: 1, tanya: "Bagaimana perasaan Anda saat melaksanakan pembelajaran tadi?" },
+      { no: 2, tanya: "Apa yang menurut Anda sudah berjalan baik sesuai dengan rencana?" },
+      { no: 3, tanya: "Apa tantangan utama yang dihadapi selama pembelajaran?" },
+      { no: 4, tanya: "Bagaimana respon dan keterlibatan murid menurut Anda?" },
+      { no: 5, tanya: "Apa yang akan Anda lakukan berbeda pada pembelajaran berikutnya?" }
+    ];
+
+    let currentUser = null;
+    let isSimulationMode = false;
+    let simReportsLocal = [];
+    let praState = {};
+    let obsSkorState = {};
+    let obsPmState = {};
+    let pascaState = {};
+    let allRekapCache = [];
+
+    // Pengaturan Gate Login & Registrasi (Tersinkron ke Supabase untuk Semua Perangkat)
+    let portalGateCache = { regOpen: true, loginOpen: true };
+
+    function getPortalGateConfig() {
+      return portalGateCache;
+    }
+
+    async function syncPortalGateFromSupabase() {
+      try {
+        const { data, error } = await db
+          .from('superkolak_pengaturan')
+          .select('reg_open, login_open')
+          .eq('id', 1)
+          .maybeSingle();
+
+        if (!error && data) {
+          portalGateCache = {
+            regOpen: Boolean(data.reg_open),
+            loginOpen: Boolean(data.login_open)
+          };
+          localStorage.setItem('superkolak_portal_gate', JSON.stringify(portalGateCache));
+        } else {
+          const raw = localStorage.getItem('superkolak_portal_gate');
+          if (raw) portalGateCache = JSON.parse(raw);
+        }
+      } catch (e) {
+        const raw = localStorage.getItem('superkolak_portal_gate');
+        if (raw) portalGateCache = JSON.parse(raw);
+      }
+      applyPortalGateUI();
+    }
+
+    async function savePortalGateConfig(cfg) {
+      portalGateCache = { regOpen: Boolean(cfg.regOpen), loginOpen: Boolean(cfg.loginOpen) };
+      localStorage.setItem('superkolak_portal_gate', JSON.stringify(portalGateCache));
+      applyPortalGateUI();
+
+      const { error } = await db
+        .from('superkolak_pengaturan')
+        .upsert({
+          id: 1,
+          reg_open: portalGateCache.regOpen,
+          login_open: portalGateCache.loginOpen,
+          updated_at: new Date().toISOString()
+        });
+
+      if (error) {
+        showGateAlert('Tersimpan di browser ini, namun gagal sinkron ke Supabase: ' + error.message);
+      }
+    }
+
+    function applyPortalGateUI() {
+      const cfg = getPortalGateConfig();
+      const loginNotice = document.getElementById('loginClosedNotice');
+      const regNotice = document.getElementById('regClosedNotice');
+      const regOpenBody = document.getElementById('regOpenBody');
+
+      if (loginNotice) loginNotice.classList.toggle('hidden', cfg.loginOpen);
+      if (regNotice) regNotice.classList.toggle('hidden', cfg.regOpen);
+      if (regOpenBody) regOpenBody.classList.toggle('hidden', !cfg.regOpen);
+
+      const badgeReg = document.getElementById('badgeRegStatus');
+      const btnReg = document.getElementById('btnToggleReg');
+      const badgeLogin = document.getElementById('badgeLoginStatus');
+      const btnLogin = document.getElementById('btnToggleLogin');
+
+      if (badgeReg && btnReg) {
+        badgeReg.textContent = cfg.regOpen ? 'DIBUKA' : 'DIMATIKAN';
+        badgeReg.className = 'gate-status-badge ' + (cfg.regOpen ? 'status-on' : 'status-off');
+        btnReg.textContent = cfg.regOpen ? 'Matikan Registrasi' : 'Buka Registrasi';
+      }
+      if (badgeLogin && btnLogin) {
+        badgeLogin.textContent = cfg.loginOpen ? 'DIBUKA' : 'DIMATIKAN';
+        badgeLogin.className = 'gate-status-badge ' + (cfg.loginOpen ? 'status-on' : 'status-off');
+        btnLogin.textContent = cfg.loginOpen ? 'Matikan Login' : 'Buka Login';
+      }
+    }
+
+    // =========================================================================
+    // 2. INISIALISASI HALAMAN
+    // =========================================================================
+    window.addEventListener('DOMContentLoaded', () => {
+      populateDropdowns();
+      buildInstrumentUI();
+      syncPortalGateFromSupabase();
+      checkSavedSession();
+    });
+
+    function populateDropdowns() {
+      const regKec = document.getElementById('regKecamatan');
+      const fKec = document.getElementById('fKecamatanSasaran');
+      const filterKec = document.getElementById('filterRekapKec');
+      const adminFilterKec = document.getElementById('adminFilterKec');
+
+      regKec.innerHTML = '<option value="">-- Pilih Asal Kecamatan Anda --</option>';
+      fKec.innerHTML = '<option value="">-- Pilih Kecamatan Sasaran Bulan Ini --</option>';
+
+      KECAMATAN_LOTENG.forEach(k => {
+        regKec.innerHTML += `<option value="${k}">${k}</option>`;
+        fKec.innerHTML += `<option value="${k}">${k}</option>`;
+        filterKec.innerHTML += `<option value="${k}">${k}</option>`;
+        adminFilterKec.innerHTML += `<option value="${k}">${k}</option>`;
+      });
+
+      const fPeriode = document.getElementById('fPeriodeBulan');
+      const filterBulan = document.getElementById('filterRekapBulan');
+      const adminFilterBulan = document.getElementById('adminFilterBulan');
+      const now = new Date();
+      const curMonthIdx = now.getMonth();
+      const curYear = now.getFullYear();
+
+      [2026, 2027].forEach(yr => {
+        DAFTAR_BULAN.forEach((bln, idx) => {
+          const label = `${bln} ${yr}`;
+          const selected = (yr === curYear && idx === curMonthIdx) ? 'selected' : '';
+          fPeriode.innerHTML += `<option value="${label}" ${selected}>${label}</option>`;
+          filterBulan.innerHTML += `<option value="${label}">${label}</option>`;
+          adminFilterBulan.innerHTML += `<option value="${label}">${label}</option>`;
+        });
+      });
+
+      document.getElementById('fTanggal').value = now.toISOString().split('T')[0];
+    }
+
+    function updateDropdownSekolah(selectedSchool = '') {
+      const kec = document.getElementById('fKecamatanSasaran').value;
+      const selSekolah = document.getElementById('fSekolah');
+
+      if (!kec || !SEKOLAH_PER_KECAMATAN[kec]) {
+        selSekolah.innerHTML = '<option value="">-- Pilih Kecamatan Sasaran Terlebih Dahulu --</option>';
+        return;
+      }
+
+      const daftar = SEKOLAH_PER_KECAMATAN[kec];
+      selSekolah.innerHTML = `<option value="">-- Pilih Sekolah di Kec. ${kec} (${daftar.length} Sekolah) --</option>`;
+      daftar.forEach(sek => {
+        const isSel = (sek === selectedSchool) ? 'selected' : '';
+        selSekolah.innerHTML += `<option value="${sek}" ${isSel}>${sek}</option>`;
+      });
+    }
+
+    function checkSavedSession() {
+      const saved = localStorage.getItem('superkolak_user');
+      if (saved) {
+        try {
+          currentUser = JSON.parse(saved);
+          enterApp();
+        } catch (e) {
+          localStorage.removeItem('superkolak_user');
+        }
+      }
+    }
+
+    // =========================================================================
+    // 3. OTENTIKASI (TERMASUK AKUN DUMMY/DUMMY & ADMIN) + REGISTRASI OTOMATIS
+    // =========================================================================
+    function switchAuthTab(mode) {
+      document.getElementById('authAlert').classList.add('hidden');
+      applyPortalGateUI();
+      if (mode === 'login') {
+        document.getElementById('tabLoginBtn').classList.add('active');
+        document.getElementById('tabRegBtn').classList.remove('active');
+        document.getElementById('loginForm').classList.remove('hidden');
+        document.getElementById('registerForm').classList.add('hidden');
+      } else {
+        document.getElementById('tabRegBtn').classList.add('active');
+        document.getElementById('tabLoginBtn').classList.remove('active');
+        document.getElementById('registerForm').classList.remove('hidden');
+        document.getElementById('loginForm').classList.add('hidden');
+      }
+    }
+
+    function togglePwd(inputId, btn) {
+      const inp = document.getElementById(inputId);
+      if (inp.type === 'password') {
+        inp.type = 'text';
+        btn.textContent = 'Sembunyi';
+      } else {
+        inp.type = 'password';
+        btn.textContent = 'Lihat';
+      }
+    }
+
+    function showAuthAlert(type, htmlMsg) {
+      const el = document.getElementById('authAlert');
+      el.className = `alert alert-${type}`;
+      el.innerHTML = htmlMsg;
+      el.classList.remove('hidden');
+    }
+
+    async function handleRegister(e) {
+      e.preventDefault();
+      const cfg = getPortalGateConfig();
+      if (!cfg.regOpen) {
+        showAuthAlert('warning', 'Pendaftaran pengawas baru sedang ditutup sementara oleh Admin.');
+        return;
+      }
+
+      const nama = document.getElementById('regNama').value.trim();
+      const kec = document.getElementById('regKecamatan').value;
+      if (!nama || !kec) return;
+
+      const btn = document.getElementById('btnReg');
+      btn.disabled = true;
+      btn.textContent = 'Memproses pendaftaran...';
+
+      const { data, error } = await db.rpc('daftar_pengawas_superkolak', {
+        p_nama: nama,
+        p_kecamatan: kec
+      });
+
+      btn.disabled = false;
+      btn.textContent = 'Daftar & Buat Username Otomatis';
+
+      if (error) {
+        showAuthAlert('danger', 'Gagal mendaftar: ' + error.message);
+        return;
+      }
+
+      document.getElementById('registerForm').reset();
+      switchAuthTab('login');
+      document.getElementById('loginUsername').value = data.username;
+      document.getElementById('loginPassword').value = 'pasloteng';
+
+      showAuthAlert('success', `
+        <strong>Registrasi Berhasil!</strong><br>
+        Nama: <strong>${data.nama_lengkap}</strong> (${data.asal_kecamatan})<br>
+        Username Anda: <strong style="font-size:15px;color:#0f294a;">${data.username}</strong><br>
+        Kata Sandi Awal: <strong>pasloteng</strong><br>
+        <small>Username dan sandi sudah diisikan otomatis. Silakan klik "Masuk".</small>
+      `);
+    }
+
+    async function handleLogin(e) {
+      e.preventDefault();
+      const uname = document.getElementById('loginUsername').value.trim().toLowerCase();
+      const pwd = document.getElementById('loginPassword').value;
+      const cfg = getPortalGateConfig();
+
+      // 1. AKUN KHUSUS SIMULASI: dummy / dummy (Selalu diizinkan & murni lokal)
+      if (uname === 'dummy' && pwd === 'dummy') {
+        currentUser = {
+          id: '00000000-0000-0000-0000-000000000000',
+          username: 'dummy',
+          nama_lengkap: 'Pengawas Simulasi (Dummy)',
+          asal_kecamatan: 'Praya',
+          role: 'dummy'
+        };
+        localStorage.setItem('superkolak_user', JSON.stringify(currentUser));
+        enterApp();
+        aktifkanModeSimulasi();
+        return;
+      }
+
+      // 2. AKUN KHUSUS ADMIN KABUPATEN: admin / adminloteng
+      if (uname === 'admin' && pwd === 'adminloteng') {
+        currentUser = {
+          id: '00000000-0000-0000-0000-000000000001',
+          username: 'admin',
+          nama_lengkap: 'Admin Kabupaten Loteng',
+          asal_kecamatan: 'Kabupaten Lombok Tengah',
+          role: 'admin'
+        };
+        localStorage.setItem('superkolak_user', JSON.stringify(currentUser));
+        enterApp();
+        switchMainView('admin');
+        return;
+      }
+
+      // 3. CEK PINTU LOGIN PENGAWAS RESMI
+      if (!cfg.loginOpen) {
+        showAuthAlert('warning', '<strong>Login Pengawas Sedang Ditutup Sementara</strong> oleh Admin Kabupaten. Untuk uji coba silakan gunakan username <strong>dummy</strong> dan sandi <strong>dummy</strong>.');
+        return;
+      }
+
+      const btn = document.getElementById('btnLogin');
+      btn.disabled = true;
+      btn.textContent = 'Memeriksa akun...';
+
+      const { data, error } = await db
+        .from('superkolak_pengawas')
+        .select('*')
+        .eq('username', uname)
+        .eq('password', pwd)
+        .maybeSingle();
+
+      btn.disabled = false;
+      btn.textContent = 'Masuk';
+
+      if (error) {
+        showAuthAlert('danger', 'Gangguan koneksi: ' + error.message);
+        return;
+      }
+      if (!data) {
+        const uClean = (uname || '').trim().toLowerCase();
+        const pClean = (pwd || '').trim();
+        const listKec = typeof KECAMATAN_LOTENG !== 'undefined' ? KECAMATAN_LOTENG : [];
+        const matchKec = listKec.find(kec => {
+          const slug = kec.toLowerCase().replace(/[^a-z0-9]/g, '');
+          return `admin_${slug}` === uClean;
+        });
+
+        if (matchKec) {
+          const { data: dbKecAkun } = await db
+            .from('superkolak_pengawas')
+            .select('*')
+            .eq('username', uClean)
+            .maybeSingle();
+
+          const sandiBenar = dbKecAkun && dbKecAkun.password ? dbKecAkun.password : 'pasloteng';
+          if (pClean === sandiBenar) {
+            currentUser = {
+              ...(dbKecAkun || {}),
+              id: (dbKecAkun && dbKecAkun.id) || `admin_kec_${matchKec.toLowerCase().replace(/[^a-z0-9]/g, '')}`,
+              nama_lengkap: (dbKecAkun && dbKecAkun.nama_lengkap) || `Admin Kecamatan ${matchKec}`,
+              username: uClean,
+              password: sandiBenar,
+              asal_kecamatan: (dbKecAkun && dbKecAkun.asal_kecamatan) || matchKec,
+              role: 'admin_kecamatan'
+            };
+            localStorage.setItem('superkolak_user', JSON.stringify(currentUser));
+            enterApp();
+            return;
+          }
+        }
+
+        showAuthAlert('danger', 'Username atau kata sandi tidak sesuai. Pastikan huruf kecil tanpa spasi.');
+        return;
+      }
+
+      const uLoginClean = (data.username || '').trim().toLowerCase();
+      const isAdminKecLogin = uLoginClean.startsWith('admin_');
+      currentUser = {
+        ...data,
+        role: isAdminKecLogin ? 'admin_kecamatan' : 'pengawas'
+      };
+      localStorage.setItem('superkolak_user', JSON.stringify(currentUser));
+      enterApp();
+    }
+
+    function enterApp() {
+      document.getElementById('authSection').classList.add('hidden');
+      document.getElementById('appSection').classList.remove('hidden');
+      document.getElementById('headerUserBox').classList.remove('hidden');
+      document.getElementById('headerUserText').textContent = (currentUser.role === 'admin' || currentUser.role === 'dummy') ? currentUser.nama_lengkap : `${currentUser.nama_lengkap} (${currentUser.role})`;
+      document.getElementById('confirmSupName').textContent = currentUser.nama_lengkap;
+
+      const isSpecial = (currentUser.role === 'dummy' || currentUser.role === 'admin');
+      document.getElementById('btnHdrPwd').classList.toggle('hidden', isSpecial);
+      document.getElementById('navAdminBtn').classList.toggle('hidden', currentUser.role !== 'admin');
+document.getElementById('btnMulaiSimulasi').classList.toggle('hidden', currentUser.role === 'admin' || currentUser.role === 'admin_kecamatan' || currentUser.role === 'dummy');
+      const isAdminKecLogin = currentUser && currentUser.role === 'admin_kecamatan';
+      const navFormEl = document.getElementById('navFormBtn');
+      const navMyListEl = document.getElementById('navMyListBtn');
+      if (navFormEl) navFormEl.classList.toggle('hidden', isAdminKecLogin);
+      if (navMyListEl) navMyListEl.classList.toggle('hidden', isAdminKecLogin);
+
+      if (currentUser.role === 'dummy' && !isSimulationMode) {
+        aktifkanModeSimulasi();
+      } else if (isAdminKecLogin) {
+        const kecEl = document.getElementById('filterRekapKec');
+        if (kecEl && currentUser.asal_kecamatan) {
+          kecEl.value = currentUser.asal_kecamatan;
+          kecEl.disabled = true;
+        }
+        switchMainView('rekap');
+      } else {
+        goStep(0);
+        cekStatusKunciBulan();
+      }
+    }
+
+    function logout() {
+      if (isSimulationMode) keluarModeSimulasi(true);
+      localStorage.removeItem('superkolak_user');
+      currentUser = null;
+      document.getElementById('appSection').classList.add('hidden');
+      document.getElementById('headerUserBox').classList.add('hidden');
+      document.getElementById('authSection').classList.remove('hidden');
+      applyPortalGateUI();
+    }
+
+    // UBAH PASSWORD MANDIRI
+    function bukaModalPassword() {
+      document.getElementById('pwdModalAlert').classList.add('hidden');
+      document.getElementById('newPwd1').value = '';
+      document.getElementById('newPwd2').value = '';
+      document.getElementById('modalPwd').classList.remove('hidden');
+    }
+    function tutupModalPassword() {
+      document.getElementById('modalPwd').classList.add('hidden');
+    }
+    async function simpanPasswordBaru() {
+      const p1 = document.getElementById('newPwd1').value.trim();
+      const p2 = document.getElementById('newPwd2').value.trim();
+      const al = document.getElementById('pwdModalAlert');
+
+      if (p1.length < 4) {
+        al.className = 'alert alert-danger';
+        al.textContent = 'Kata sandi baru minimal 4 karakter.';
+        al.classList.remove('hidden');
+        return;
+      }
+      if (p1 !== p2) {
+        al.className = 'alert alert-danger';
+        al.textContent = 'Ulangan kata sandi tidak sama.';
+        al.classList.remove('hidden');
+        return;
+      }
+
+      const { error } = await db
+        .from('superkolak_pengawas')
+        .update({ password: p1 })
+        .eq('id', currentUser.id);
+
+      if (error) {
+        al.className = 'alert alert-danger';
+        al.textContent = 'Gagal memperbarui sandi: ' + error.message;
+        al.classList.remove('hidden');
+        return;
+      }
+
+      currentUser.password = p1;
+      localStorage.setItem('superkolak_user', JSON.stringify(currentUser));
+      al.className = 'alert alert-success';
+      al.textContent = 'Kata sandi berhasil diperbarui.';
+      al.classList.remove('hidden');
+      setTimeout(tutupModalPassword, 1100);
+    }
+
+    // =========================================================================
+    // 4. MODE SIMULASI JALAN TENGAH (AUTO-ISI DUMMY & BEBAS DIUBAH)
+    // =========================================================================
+    function bukaModalSimulasi() {
+      document.getElementById('modalSimulasi').classList.remove('hidden');
+    }
+    function tutupModalSimulasi() {
+      document.getElementById('modalSimulasi').classList.add('hidden');
+    }
+
+    function aktifkanModeSimulasi() {
+      tutupModalSimulasi();
+      isSimulationMode = true;
+      document.getElementById('simActiveBanner').classList.remove('hidden');
+      document.getElementById('btnMulaiSimulasi').classList.add('hidden');
+      document.getElementById('btnSimpanLaporan').textContent = 'Simpan Hasil Simulasi (Lokal)';
+
+      const contohKec = currentUser && KECAMATAN_LOTENG.includes(currentUser.asal_kecamatan)
+        ? currentUser.asal_kecamatan
+        : 'Praya';
+      document.getElementById('fKecamatanSasaran').value = contohKec;
+      const daftarSek = SEKOLAH_PER_KECAMATAN[contohKec] || [];
+      updateDropdownSekolah(daftarSek[0] || '');
+
+      document.getElementById('fKepsek').value = 'H. Lalu Muhammad Zaenudin, S.Pd.';
+      document.getElementById('fGuru').value = 'Baiq Siti Rahmawati, S.Pd.';
+      document.getElementById('fMapel').value = 'Matematika / Guru Kelas IV';
+      document.getElementById('fKelas').value = 'IV / Ganjil';
+      document.getElementById('fMateri').value = 'Pecahan Senilai dan Penerapannya dalam Kehidupan Sehari-hari';
+
+      // Isi Otomatis Bagian 2: Praobservasi
+      PRA_ITEMS.forEach(item => {
+        const statusVal = item.opsional && item.no % 2 === 0 ? 'Opsional' : 'Ya';
+        setPraStatus(item.no, statusVal);
+        const catVal = statusVal === 'Ya' ? 'Tersedia lengkap dan selaras dengan tujuan pembelajaran.' : '';
+        praState[item.no].catatan = catVal;
+        const inp = document.getElementById(`pra_cat_${item.no}`);
+        if (inp) inp.value = catVal;
+      });
+
+      // Isi Otomatis Bagian 3: Observasi Skor 1-4 (Butir 1-8)
+      const contohSkor = [4, 4, 3, 4, 3, 3, 4, 3];
+      OBS_SKOR_ITEMS.forEach((item, idx) => {
+        const sk = contohSkor[idx] || 3;
+        setObsSkor(item.no, sk);
+        const catSkor = 'Guru memfasilitasi murid secara aktif dan komunikatif.';
+        obsSkorState[item.no].catatan = catSkor;
+        const inp = document.getElementById(`skor_cat_${item.no}`);
+        if (inp) inp.value = catSkor;
+      });
+
+      // Isi Otomatis Bagian 3: Pembelajaran Mendalam (Butir 9-20) — Dropdown ADA / TIDAK ADA
+      OBS_PM_ITEMS.forEach(item => {
+        const buktiVal = (item.no === 13 || item.no === 14) ? 'TIDAK ADA' : 'ADA';
+        const catVal = buktiVal === 'ADA' ? 'Terlaksana dengan baik sesuai alur pembelajaran mendalam.' : '';
+        obsPmState[item.no].bukti = buktiVal;
+        obsPmState[item.no].catatan = catVal;
+        const elB = document.getElementById(`pm_bukti_${item.no}`);
+        const elC = document.getElementById(`pm_cat_${item.no}`);
+        if (elB) elB.value = buktiVal;
+        if (elC) elC.value = catVal;
+      });
+
+      document.getElementById('fCatatanSup').value = 'Pembelajaran berlangsung interaktif, berkesadaran, dan menggembirakan bagi murid.';
+      document.getElementById('fRekomendasi').value = 'Pertahankan pola pertanyaan pemantik terbuka serta perkuat umpan balik individu saat kerja kelompok.';
+      document.getElementById('fTindakLanjut').value = 'Berbagi praktik baik pada forum KKG gugus bulan depan.';
+
+      // Isi Otomatis Bagian 4: Pascaobservasi (5 Pertanyaan)
+      const contohRefleksi = [
+        'Merasa senang dan terbantu karena alur kegiatan berjalan lancar sesuai rencana.',
+        'Apersepsi kontekstual dan kerja kelompok berjalan sangat hidup.',
+        'Pengelolaan waktu pada sesi presentasi kelompok masih perlu sedikit diringkas.',
+        'Murid sangat antusias bertanya dan berani menyampaikan pendapat di depan kelas.',
+        'Akan menyiapkan lembar panduan waktu per kelompok agar sesi refleksi akhir lebih optimal.'
+      ];
+      PASCA_ITEMS.forEach((item, idx) => {
+        pascaState[item.no] = contohRefleksi[idx];
+        const elP = document.getElementById(`pasca_cat_${item.no}`);
+        if (elP) elP.value = contohRefleksi[idx];
+      });
+
+      switchMainView('form');
+      goStep(0);
+      showFormAlert('warning', '<strong>Mode Simulasi Siap!</strong> Seluruh kolom telah terisi contoh data dummy. Silakan ubah kecamatan, sekolah, atau skor sesuka Anda, lalu coba simpan dan cetak PDF.');
+    }
+
+    function keluarModeSimulasi(silent = false) {
+      if (currentUser && currentUser.role === 'dummy' && !silent) {
+        logout();
+        return;
+      }
+      isSimulationMode = false;
+      simReportsLocal = [];
+      document.getElementById('simActiveBanner').classList.add('hidden');
+      document.getElementById('btnMulaiSimulasi').classList.toggle('hidden', currentUser && currentUser.role === 'admin');
+      document.getElementById('btnSimpanLaporan').textContent = 'Simpan & Kirim Laporan';
+      resetFormKosong();
+      if (!silent) {
+        switchMainView('form');
+        goStep(0);
+        showFormAlert('info', 'Anda telah keluar dari Mode Simulasi. Aplikasi kembali ke mode data resmi.');
+      }
+    }
+
+    function resetFormKosong() {
+      document.getElementById('fKecamatanSasaran').value = '';
+      updateDropdownSekolah('');
+      document.getElementById('fKepsek').value = '';
+      document.getElementById('fGuru').value = '';
+      document.getElementById('fMapel').value = '';
+      document.getElementById('fKelas').value = '';
+      document.getElementById('fMateri').value = '';
+      document.getElementById('fCatatanSup').value = '';
+      document.getElementById('fRekomendasi').value = '';
+      document.getElementById('fTindakLanjut').value = '';
+      buildInstrumentUI();
+      hitungNilaiObservasi();
+    }
+
+    // =========================================================================
+    // 5. MERAKIT ANTARMUKA BUTIR INSTRUMEN SUPERKOLAK
+    // =========================================================================
+    function buildInstrumentUI() {
+      // A. PRAOBSERVASI (20 BUTIR — MEMPERTAHANKAN LABEL OPSIONAL DOKUMEN ASLI)
+      const praDiv = document.getElementById('praContainer');
+      praDiv.innerHTML = PRA_ITEMS.map(item => {
+        praState[item.no] = { status: '', catatan: '' };
+        return `
+          <div class="item-card">
+            <div class="item-top">
+              <div>
+                <span class="item-num">${item.no}</span>
+                <span class="item-title">${item.komponen}</span>
+              </div>
+              ${item.opsional ? '<span class="badge-opt">Opsional</span>' : ''}
+            </div>
+            <div class="item-indikator">${item.indikator}</div>
+            <div class="choice-row">
+              <button type="button" id="pra_btn_${item.no}_Ya" class="choice-btn" onclick="setPraStatus(${item.no}, 'Ya')">Ya</button>
+              <button type="button" id="pra_btn_${item.no}_Tidak" class="choice-btn" onclick="setPraStatus(${item.no}, 'Tidak')">Tidak</button>
+              ${item.opsional ? `<button type="button" id="pra_btn_${item.no}_Opsional" class="choice-btn" onclick="setPraStatus(${item.no}, 'Opsional')">Lewati (Opsional)</button>` : ''}
+            </div>
+            <input type="text" id="pra_cat_${item.no}" placeholder="Catatan telaah..." oninput="praState[${item.no}].catatan = this.value" />
+          </div>
+        `;
+      }).join('');
+
+      // B. OBSERVASI SKOR 1-4 (BUTIR 1-8 — WAJIB SKOR, CATATAN PILIHAN)
+      const obsSkorDiv = document.getElementById('obsSkorContainer');
+      let lastBagian = '';
+      obsSkorDiv.innerHTML = OBS_SKOR_ITEMS.map(item => {
+        obsSkorState[item.no] = { skor: 0, catatan: '' };
+        let headerHtml = '';
+        if (item.bagian !== lastBagian) {
+          lastBagian = item.bagian;
+          headerHtml = `<div class="section-divider">${item.bagian}</div>`;
+        }
+        return `
+          ${headerHtml}
+          <div id="skor_card_${item.no}" class="item-card">
+            <div class="item-top">
+              <div>
+                <span class="item-num">${item.no}</span>
+                <span class="item-title">${item.aspek} <span class="req">*</span></span>
+              </div>
+            </div>
+            <div class="item-indikator">${item.indikator}</div>
+            <div class="choice-row">
+              ${[1, 2, 3, 4].map(s => `
+                <button type="button" id="skor_btn_${item.no}_${s}" class="choice-btn" onclick="setObsSkor(${item.no}, ${s})">Skor ${s}</button>
+              `).join('')}
+            </div>
+            <input type="text" id="skor_cat_${item.no}" placeholder="Catatan pengamatan butir ${item.no}..." oninput="obsSkorState[${item.no}].catatan = this.value" />
+          </div>
+        `;
+      }).join('');
+
+      // C. OBSERVASI PEMBELAJARAN MENDALAM (BUTIR 9-20 — DROPDOWN ADA / TIDAK ADA, TANPA EMBEL-EMBEL OPSIONAL)
+      const obsPmDiv = document.getElementById('obsPmContainer');
+      let lastSub = '';
+      obsPmDiv.innerHTML = OBS_PM_ITEMS.map(item => {
+        obsPmState[item.no] = { bukti: '', catatan: '' };
+        let subHtml = '';
+        if (item.sub !== lastSub) {
+          lastSub = item.sub;
+          subHtml = `<div style="font-weight:700;color:var(--navy);margin:14px 0 8px 0;font-size:13px;">${item.sub}</div>`;
+        }
+        return `
+          ${subHtml}
+          <div class="item-card">
+            <div class="item-top">
+              <div>
+                <span class="item-num">${item.no}</span>
+                <span class="item-title">Aspek Pembelajaran Mendalam</span>
+              </div>
+            </div>
+            <div class="item-indikator">${item.aspek}</div>
+            <div class="form-grid cols-2">
+              <div class="form-group">
+                <label style="font-size:11.5px;">Bukti Pembelajaran</label>
+                <select id="pm_bukti_${item.no}" onchange="obsPmState[${item.no}].bukti = this.value">
+                  <option value="">-- Pilih --</option>
+                  <option value="ADA">ADA</option>
+                  <option value="TIDAK ADA">TIDAK ADA</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label style="font-size:11.5px;">Catatan</label>
+                <input type="text" id="pm_cat_${item.no}" placeholder="Catatan pengamatan..." oninput="obsPmState[${item.no}].catatan = this.value" />
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      // D. PASCAOBSERVASI (5 PERTANYAAN REFLEKSI)
+      const pascaDiv = document.getElementById('pascaContainer');
+      pascaDiv.innerHTML = PASCA_ITEMS.map(item => {
+        pascaState[item.no] = '';
+        return `
+          <div class="item-card">
+            <div class="item-top">
+              <div>
+                <span class="item-num">${item.no}</span>
+                <span class="item-title">${item.tanya}</span>
+              </div>
+            </div>
+            <textarea id="pasca_cat_${item.no}" placeholder="Tuliskan catatan refleksi guru..." oninput="pascaState[${item.no}] = this.value"></textarea>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function setPraStatus(no, val) {
+      praState[no].status = val;
+      ['Ya', 'Tidak', 'Opsional'].forEach(opt => {
+        const b = document.getElementById(`pra_btn_${no}_${opt}`);
+        if (!b) return;
+        b.className = 'choice-btn';
+        if (opt === val) {
+          if (val === 'Ya') b.classList.add('selected-ya');
+          else if (val === 'Tidak') b.classList.add('selected-tidak');
+          else b.classList.add('selected-opt');
+        }
+      });
+    }
+
+    function isiSemuaPraYa() {
+      PRA_ITEMS.forEach(item => {
+        if (!item.opsional && !praState[item.no].status) {
+          setPraStatus(item.no, 'Ya');
+        }
+      });
+    }
+
+    function setObsSkor(no, skor) {
+      obsSkorState[no].skor = skor;
+      const card = document.getElementById(`skor_card_${no}`);
+      if (card) card.classList.remove('missing-highlight');
+      [1, 2, 3, 4].forEach(s => {
+        const b = document.getElementById(`skor_btn_${no}_${s}`);
+        b.className = 'choice-btn' + (s === skor ? ' selected-skor' : '');
+      });
+      hitungNilaiObservasi();
+    }
+
+    function hitungNilaiObservasi() {
+      let total = 0;
+      OBS_SKOR_ITEMS.forEach(item => {
+        total += (obsSkorState[item.no].skor || 0);
+      });
+      const na = ((total / 32) * 100);
+      let kat = '-';
+      if (total > 0) {
+        if (na < 60) kat = 'Kurang';
+        else if (na <= 75) kat = 'Cukup';
+        else if (na <= 90) kat = 'Baik';
+        else kat = 'Sangat Baik';
+      }
+      document.getElementById('dispTotalSkor').textContent = total;
+      document.getElementById('dispNilaiAkhir').textContent = na.toFixed(2);
+      document.getElementById('dispKategori').textContent = kat;
+      return { total, na: Number(na.toFixed(2)), kat };
+    }
+
+    // =========================================================================
+    // 6. VALIDASI WAJIB IDENTITAS + SKOR 1-8 & SIMPAN LAPORAN
+    // =========================================================================
+    async function cekStatusKunciBulan() {
+      if (isSimulationMode || !currentUser || currentUser.role !== 'pengawas') return;
+      const periode = document.getElementById('fPeriodeBulan').value;
+      const { data } = await db
+        .from('superkolak_laporan')
+        .select('id, nama_sekolah, kecamatan_sasaran')
+        .eq('pengawas_id', currentUser.id)
+        .eq('periode_bulan', periode)
+        .limit(1);
+
+      if (data && data.length > 0) {
+        showFormAlert('warning', `<strong>Informasi Periode ${periode}:</strong> Anda sudah mengirimkan laporan untuk <strong>${data[0].nama_sekolah}</strong> (Kec. ${data[0].kecamatan_sasaran}). Sesuai ketentuan 1 pengawas = 1 sekolah sasaran per bulan kegiatan, pengisian resmi untuk periode ini sudah dikunci.`);
+      } else {
+        document.getElementById('formAlert').classList.add('hidden');
+      }
+    }
+
+    function goStep(stepIdx) {
+      if (!isSimulationMode) {
+        document.getElementById('formAlert').classList.add('hidden');
+      }
+      for (let i = 0; i < 4; i++) {
+        document.getElementById(`step${i}`).classList.toggle('hidden', i !== stepIdx);
+        const tab = document.getElementById(`stepTab${i}`);
+        tab.classList.remove('active');
+        if (i === stepIdx) tab.classList.add('active');
+      }
+      if (stepIdx === 3) {
+        document.getElementById('confirmGuruName').textContent = document.getElementById('fGuru').value.trim() || '(Belum diisi)';
+        document.getElementById('confirmKepsekName').textContent = document.getElementById('fKepsek').value.trim() || '(Belum diisi)';
+      }
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function showFormAlert(type, msg) {
+      const el = document.getElementById('formAlert');
+      el.className = `alert alert-${type}`;
+      el.innerHTML = msg;
+      el.classList.remove('hidden');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    async function submitLaporan() {
+      // 1. VALIDASI IDENTITAS (TAHAP 1)
+      const periode = document.getElementById('fPeriodeBulan').value;
+      const tanggal = document.getElementById('fTanggal').value;
+      const kecSasaran = document.getElementById('fKecamatanSasaran').value;
+      const sekolah = document.getElementById('fSekolah').value.trim();
+      const kepsek = document.getElementById('fKepsek').value.trim();
+      const guru = document.getElementById('fGuru').value.trim();
+      const mapel = document.getElementById('fMapel').value.trim();
+      const kelas = document.getElementById('fKelas').value.trim();
+      const materi = document.getElementById('fMateri').value.trim();
+
+      if (!kecSasaran || !sekolah || !kepsek || !guru || !mapel || !kelas || !materi || !tanggal) {
+        goStep(0);
+        showFormAlert('danger', 'Mohon lengkapi seluruh kolom bertanda bintang (*) pada <strong>Bagian 1 — Identitas</strong> sebelum menyimpan.');
+        return;
+      }
+
+      // 2. VALIDASI WAJIB SKOR 1-4 PADA BUTIR 1-8 (CATATAN & BAGIAN LAIN BEBAS DILEWATI)
+      const missingSkorNos = [];
+      OBS_SKOR_ITEMS.forEach(it => {
+        const card = document.getElementById(`skor_card_${it.no}`);
+        if (!obsSkorState[it.no].skor || obsSkorState[it.no].skor < 1) {
+          missingSkorNos.push(it.no);
+          if (card) card.classList.add('missing-highlight');
+        } else {
+          if (card) card.classList.remove('missing-highlight');
+        }
+      });
+
+      if (missingSkorNos.length > 0) {
+        goStep(2);
+        showFormAlert('danger', `Mohon pilih angka <strong>Skor (1–4)</strong> pada butir nomor <strong>${missingSkorNos.join(', ')}</strong> terlebih dahulu. Kolom catatan boleh dikosongkan.`);
+        const firstMissing = document.getElementById(`skor_card_${missingSkorNos[0]}`);
+        if (firstMissing) setTimeout(() => firstMissing.scrollIntoView({ behavior: 'smooth', block: 'center' }), 200);
+        return;
+      }
+
+      const skorData = hitungNilaiObservasi();
+      const praPayload = PRA_ITEMS.map(it => ({
+        no: it.no,
+        komponen: it.komponen,
+        status: praState[it.no].status || (it.opsional ? 'Opsional' : '-'),
+        catatan: praState[it.no].catatan || ''
+      }));
+
+      const obsSkorPayload = OBS_SKOR_ITEMS.map(it => ({
+        no: it.no,
+        bagian: it.bagian,
+        aspek: it.aspek,
+        skor: obsSkorState[it.no].skor || 0,
+        catatan: obsSkorState[it.no].catatan || ''
+      }));
+
+      const obsPmPayload = OBS_PM_ITEMS.map(it => ({
+        no: it.no,
+        sub: it.sub,
+        aspek: it.aspek,
+        bukti: obsPmState[it.no].bukti || '-',
+        catatan: obsPmState[it.no].catatan || ''
+      }));
+
+      const pascaPayload = PASCA_ITEMS.map(it => ({
+        no: it.no,
+        tanya: it.tanya,
+        catatan: pascaState[it.no] || ''
+      }));
+
+      const payloadObj = {
+        pengawas_id: currentUser.id,
+        pengawas_username: currentUser.username,
+        pengawas_nama: currentUser.nama_lengkap,
+        pengawas_asal_kecamatan: currentUser.asal_kecamatan,
+        periode_bulan: periode,
+        tanggal_supervisi: tanggal,
+        kecamatan_sasaran: kecSasaran,
+        nama_sekolah: sekolah,
+        nama_kepala_sekolah: kepsek,
+        nama_guru: guru,
+        mata_pelajaran: mapel,
+        kelas_semester: kelas,
+        materi_pokok: materi,
+        praobservasi: praPayload,
+        observasi_skor: obsSkorPayload,
+        total_skor: skorData.total,
+        nilai_akhir: skorData.na,
+        kategori_nilai: skorData.kat,
+        observasi_pm: obsPmPayload,
+        catatan_supervisor: document.getElementById('fCatatanSup').value.trim(),
+        rekomendasi: document.getElementById('fRekomendasi').value.trim(),
+        tindak_lanjut: document.getElementById('fTindakLanjut').value.trim(),
+        pascaobservasi: pascaPayload,
+        is_simulasi: isSimulationMode
+      };
+
+      // JIKA MODE SIMULASI / AKUN DUMMY: SIMPAN DI MEMORI LOKAL SAJA (NOL SAMPAH SUPABASE)
+      if (isSimulationMode || currentUser.role === 'dummy') {
+        simReportsLocal.unshift(payloadObj);
+        showFormAlert('success', '<strong>Simulasi Berhasil Disimpan!</strong> Data simulasi telah masuk ke tab <em>Riwayat Laporan</em>, <em>Rekap Kabupaten</em>, dan <em>Panel Admin</em> (tersimpan lokal di perangkat Anda).');
+        setTimeout(() => {
+          switchMainView('mylist');
+        }, 900);
+        return;
+      }
+
+      // MODE RESMI: MAKSIMAL 3 LAPORAN PER PERIODE BULAN & TIDAK BOLEH ULANG SEKOLAH YANG SAMA
+      const btn = document.getElementById('btnSimpanLaporan');
+      btn.disabled = true;
+      btn.textContent = 'Memeriksa & Menyimpan...';
+
+      const { data: existingData, error: cekErr } = await db
+        .from('superkolak_laporan')
+        .select('id, nama_sekolah, kecamatan_sasaran')
+        .eq('pengawas_id', currentUser.id)
+        .eq('periode_bulan', periode);
+
+      if (cekErr) {
+        btn.disabled = false;
+        btn.textContent = 'Simpan & Kirim Laporan';
+        showFormAlert('danger', 'Gangguan pemeriksaan data: ' + cekErr.message);
+        return;
+      }
+
+      if (existingData && existingData.length >= 3) {
+        btn.disabled = false;
+        btn.textContent = 'Simpan & Kirim Laporan';
+        showFormAlert('danger', `<strong>Pengiriman Ditolak:</strong> Batas maksimal 3 laporan untuk periode <strong>${periode}</strong> telah tercapai.`);
+        return;
+      }
+
+      const sekolahSama = (existingData || []).find(
+        item => (item.nama_sekolah || '').trim().toLowerCase() === (sekolah || '').trim().toLowerCase()
+      );
+      if (sekolahSama) {
+        btn.disabled = false;
+        btn.textContent = 'Simpan & Kirim Laporan';
+        showFormAlert('danger', `<strong>Pengiriman Ditolak:</strong> Sekolah <strong>${sekolah}</strong> sudah dilaporkan pada periode <strong>${periode}</strong>. Silakan pilih sekolah/kecamatan lain.`);
+        return;
+      }
+
+      delete payloadObj.is_simulasi;
+      const { error } = await db.from('superkolak_laporan').insert([payloadObj]);
+
+      btn.disabled = false;
+      btn.textContent = 'Simpan & Kirim Laporan';
+
+      if (error) {
+        showFormAlert('danger', 'Gagal menyimpan laporan: ' + error.message);
+        return;
+      }
+
+      showFormAlert('success', '<strong>Laporan Berhasil Terkirim!</strong> Data supervisi telah tersimpan di pusat data Kabupaten Lombok Tengah.');
+      setTimeout(() => {
+        switchMainView('mylist');
+      }, 1100);
+    }
+
+    // =========================================================================
+    // 7. HELPER GRAFIK VISUAL RINGAN (PREDIKAT & KECAMATAN/SEKOLAH)
+    // =========================================================================
+    function renderPredikatBars(containerId, avgBadgeId, list) {
+      const cont = document.getElementById(containerId);
+      const badge = document.getElementById(avgBadgeId);
+      const total = list.length;
+
+      if (total === 0) {
+        cont.innerHTML = '<div style="font-size:12px;color:var(--text-muted);">Belum ada data grafik.</div>';
+        if (badge) badge.textContent = 'Rata-rata: -';
+        return;
+      }
+
+      const avg = list.reduce((acc, r) => acc + (Number(r.nilai_akhir) || 0), 0) / total;
+      if (badge) badge.textContent = `Rata-rata: ${avg.toFixed(1)}`;
+
+      const cats = [
+        { name: 'Sangat Baik (91–100)', key: 'Sangat Baik', color: '#15803d' },
+        { name: 'Baik (76–90)', key: 'Baik', color: '#1d4ed8' },
+        { name: 'Cukup (60–75)', key: 'Cukup', color: '#d97706' },
+        { name: 'Kurang (<60)', key: 'Kurang', color: '#b91c1c' }
+      ];
+
+      cont.innerHTML = cats.map(c => {
+        const cnt = list.filter(r => r.kategori_nilai === c.key).length;
+        const pct = Math.round((cnt / total) * 100);
+        return `
+          <div class="bar-row">
+            <div class="bar-label-top">
+              <span>${c.name}</span>
+              <strong>${cnt} laporan (${pct}%)</strong>
+            </div>
+            <div class="bar-track">
+              <div class="bar-fill" style="width:${pct}%;background:${c.color};"></div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function renderMyCharts(list) {
+      const area = document.getElementById('myChartArea');
+      if (!list || list.length === 0) {
+        area.classList.add('hidden');
+        return;
+      }
+      area.classList.remove('hidden');
+      renderPredikatBars('myPredikatChart', 'myAvgBadge', list);
+
+      const schCont = document.getElementById('mySchoolScoreChart');
+      schCont.innerHTML = list.slice(0, 6).map(r => {
+        const val = Math.min(100, Math.max(0, Number(r.nilai_akhir) || 0));
+        const shortName = (r.nama_sekolah || '').replace(/\s*\(\d+\)$/, '');
+        return `
+          <div class="bar-row">
+            <div class="bar-label-top">
+              <span style="max-width:72%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${shortName}</span>
+              <strong>${val}</strong>
+            </div>
+            <div class="bar-track">
+              <div class="bar-fill" style="width:${val}%;background:#0f294a;"></div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function renderRekapCharts(list) {
+      const area = document.getElementById('rekapChartArea');
+      if (!list || list.length === 0) {
+        area.classList.add('hidden');
+        return;
+      }
+      area.classList.remove('hidden');
+      renderPredikatBars('rekapPredikatChart', 'rekapAvgBadge', list);
+
+      const kecCont = document.getElementById('rekapKecChart');
+      const counts = KECAMATAN_LOTENG.map(k => ({
+        kec: k,
+        cnt: list.filter(r => r.kecamatan_sasaran === k).length
+      })).filter(x => x.cnt > 0).sort((a, b) => b.cnt - a.cnt);
+
+      const maxCnt = counts.length > 0 ? counts[0].cnt : 1;
+      kecCont.innerHTML = counts.slice(0, 8).map(item => {
+        const pct = Math.round((item.cnt / maxCnt) * 100);
+        return `
+          <div class="bar-row">
+            <div class="bar-label-top">
+              <span>${item.kec}</span>
+              <strong>${item.cnt} Laporan</strong>
+            </div>
+            <div class="bar-track">
+              <div class="bar-fill" style="width:${pct}%;background:#0f294a;"></div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    // =========================================================================
+    // 8. RIWAYAT LAPORAN, REKAPITULASI, PANEL ADMIN & CETAK PDF
+    // =========================================================================
+    function switchMainView(view) {
+      ['form', 'mylist', 'rekap', 'admin'].forEach(v => {
+        const sec = document.getElementById(`view${v.charAt(0).toUpperCase() + v.slice(1)}`);
+        if (sec) sec.classList.toggle('hidden', v !== view);
+      });
+      document.getElementById('navFormBtn').classList.toggle('active', view === 'form');
+      document.getElementById('navMyListBtn').classList.toggle('active', view === 'mylist');
+      document.getElementById('navAllRekapBtn').classList.toggle('active', view === 'rekap');
+      const adminNav = document.getElementById('navAdminBtn');
+      if (adminNav) adminNav.classList.toggle('active', view === 'admin');
+
+      if (view === 'mylist') loadMyReports();
+      if (view === 'rekap') loadAllRekap();
+      if (view === 'admin') loadAdminPanel();
+    }
+
+    async function loadMyReports() {
+      const tbody = document.getElementById('myReportsBody');
+      tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;">Memuat data...</td></tr>';
+
+      let dbRows = [];
+      if (currentUser.role === 'pengawas') {
+        const { data, error } = await db
+          .from('superkolak_laporan')
+          .select('*')
+          .eq('pengawas_id', currentUser.id)
+          .order('created_at', { ascending: false });
+
+        if (error && !isSimulationMode) {
+          tbody.innerHTML = `<tr><td colspan="6" style="color:red;">Gagal memuat: ${error.message}</td></tr>`;
+          return;
+        }
+        dbRows = data || [];
+      }
+
+      const combined = [...((isSimulationMode || currentUser.role === 'dummy') ? simReportsLocal : []), ...dbRows];
+      renderMyCharts(combined);
+
+      if (combined.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;">Belum ada laporan supervisi yang dikirim.</td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = combined.map((row, idx) => `
+        <tr>
+          <td>${idx + 1}</td>
+          <td><strong>${row.periode_bulan}</strong>${row.is_simulasi ? '<span class="badge-sim">SIMULASI</span>' : ''}<br><small>${row.tanggal_supervisi}</small></td>
+          <td>${row.kecamatan_sasaran}</td>
+          <td><strong>${row.nama_sekolah}</strong><br>Guru: ${row.nama_guru} (${row.kelas_semester})</td>
+          <td><strong>${row.nilai_akhir}</strong><br><small>${row.kategori_nilai}</small></td>
+          <td><button class="btn btn-sm btn-primary" onclick='cetakLaporan(${JSON.stringify(row).replace(/'/g, "&#39;")})'>Cetak / PDF</button></td>
+        </tr>
+      `).join('');
+    }
+
+    async function fetchAllCombinedReports() {
+      const { data, error } = await db
+        .from('superkolak_laporan')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error && !isSimulationMode && currentUser.role !== 'dummy') {
+        throw error;
+      }
+      return [...((isSimulationMode || currentUser.role === 'dummy') ? simReportsLocal : []), ...(data || [])];
+    }
+
+    async function loadAllRekap() {
+      const tbody = document.getElementById('allRekapBody');
+      tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;">Menyinkronkan rekap kabupaten...</td></tr>';
+
+      try {
+        allRekapCache = await fetchAllCombinedReports();
+        renderRekapTable();
+      } catch (err) {
+        tbody.innerHTML = `<tr><td colspan="7" style="color:red;">Gagal memuat: ${err.message}</td></tr>`;
+      }
+    }
+function toggleRekapDetail(boxId, btnEl) {
+  const box = document.getElementById(boxId);
+  if (!box) return;
+  const akanDibuka = box.classList.contains('hidden');
+  box.classList.toggle('hidden', !akanDibuka);
+  if (btnEl) {
+    btnEl.textContent = akanDibuka
+      ? 'Tutup Catatan, Rekomendasi & Tindak Lanjut'
+      : 'Lihat Catatan, Rekomendasi & Tindak Lanjut';
+  }
+}
+    function renderRekapTable() {
+      const kecSelectEl = document.getElementById('filterRekapKec');
+      const isAdminKec = currentUser && currentUser.role === 'admin_kecamatan' && currentUser.asal_kecamatan;
+      if (kecSelectEl) {
+        if (isAdminKec) {
+          kecSelectEl.value = currentUser.asal_kecamatan;
+          kecSelectEl.disabled = true;
+        } else {
+          kecSelectEl.disabled = false;
+        }
+      }
+      const fkec = isAdminKec ? currentUser.asal_kecamatan : (kecSelectEl ? kecSelectEl.value : '');
+      const fBln = document.getElementById('filterRekapBulan').value;
+      const tbody = document.getElementById('allRekapBody');
+
+      const searchEl = document.getElementById('cariSekolahRekap');
+      const qSekolah = (searchEl ? searchEl.value : '').trim().toLowerCase();
+
+      const filtered = allRekapCache.filter(r => {
+        if (fkec && r.kecamatan_sasaran !== fkec) return false;
+        if (fBln && r.periode_bulan !== fBln) return false;
+        if (qSekolah) {
+          const namaSek = (r.nama_sekolah || '').toLowerCase();
+          const namaGuru = (r.nama_guru || '').toLowerCase();
+          if (!namaSek.includes(qSekolah) && !namaGuru.includes(qSekolah)) return false;
+        }
+        return true;
+      });
+
+      const kecBoxEl = document.getElementById('adminKecDashboardBox');
+      if (kecBoxEl) {
+        kecBoxEl.classList.toggle('hidden', !isAdminKec);
+        if (isAdminKec) {
+          const judulWilEl = document.getElementById('adminKecJudulWilayah');
+          const jmlPengawasEl = document.getElementById('adminKecJmlPengawas');
+          const rataNilaiEl = document.getElementById('adminKecRataNilai');
+          if (judulWilEl) judulWilEl.textContent = currentUser.asal_kecamatan;
+
+          const setPengawas = new Set(
+            filtered.map(item => (item.pengawas_id || item.pengawas_nama || '').toString().trim()).filter(Boolean)
+          );
+          if (jmlPengawasEl) jmlPengawasEl.textContent = setPengawas.size;
+
+          const angkaNilai = filtered
+            .map(item => parseFloat(item.nilai_akhir))
+            .filter(val => !Number.isNaN(val));
+          const rata = angkaNilai.length > 0
+            ? (angkaNilai.reduce((acc, n) => acc + n, 0) / angkaNilai.length).toFixed(1)
+            : '0.0';
+            const predikatEl = document.getElementById('adminKecPredikatChart');
+        const sintesisEl = document.getElementById('adminKecSintesisBox');
+        const totalKec = filtered.length;
+        const counts = { 'Sangat Baik': 0, 'Baik': 0, 'Cukup': 0, 'Kurang': 0 };
+
+        filtered.forEach(item => {
+          let kat = (item.kategori_nilai || '').toString().trim();
+          const n = parseFloat(item.nilai_akhir);
+          if (!kat && !Number.isNaN(n)) {
+            if (n >= 86) kat = 'Sangat Baik';
+            else if (n >= 71) kat = 'Baik';
+            else if (n >= 56) kat = 'Cukup';
+            else kat = 'Kurang';
+          }
+          if (counts.hasOwnProperty(kat)) counts[kat] += 1;
+        });
+
+        if (predikatEl) {
+          const palette = {
+            'Sangat Baik': '#15803d',
+            'Baik': '#0369a1',
+            'Cukup': '#b45309',
+            'Kurang': '#b91c1c'
+          };
+          predikatEl.innerHTML = Object.keys(counts).map(label => {
+            const jml = counts[label];
+            const pct = totalKec > 0 ? ((jml / totalKec) * 100).toFixed(1) : '0.0';
+            const lebar = totalKec > 0 ? Math.max(0, Math.min(100, (jml / totalKec) * 100)) : 0;
+            return `
+              <div>
+                <div style="display:flex; justify-content:space-between; margin-bottom:3px; font-weight:500;">
+                  <span>${label}</span>
+                  <span>${pct}% (${jml}/${totalKec})</span>
+                </div>
+                <div style="height:8px; background:#e2e8f0; border-radius:999px; overflow:hidden;">
+                  <div style="height:100%; width:${lebar}%; background:${palette[label]}; border-radius:999px;"></div>
+                </div>
+              </div>
+            `;
+          }).join('');
+        }
+
+        if (sintesisEl) {
+          if (totalKec === 0) {
+            sintesisEl.innerHTML = '<div style="color:#64748b;">Belum ada laporan supervisi yang tercatat pada filter wilayah/periode ini sehingga kesimpulan catatan, rekomendasi, dan tindak lanjut belum dapat disusun.</div>';
+          } else {
+            const kumpulCatatan = filtered.map(r => (r.catatan_pengawas || r.catatan_supervisor || r.catatan_umum || r.catatan || '').toString().trim()).filter(Boolean);
+            const kumpulRek = filtered.map(r => (r.rekomendasi || r.saran_tindak_lanjut || '').toString().trim()).filter(Boolean);
+            const kumpulTl = filtered.map(r => (r.tindak_lanjut || r.rtl || '').toString().trim()).filter(Boolean);
+
+            const pCatatan = kumpulCatatan.length > 0
+              ? `Berdasarkan ${kumpulCatatan.length} catatan supervisi yang terisi pada wilayah ${currentUser.asal_kecamatan}, temuan lapangan yang tercatat meliputi: ${kumpulCatatan.join(' ')}`
+              : `Pada laporan yang masuk di wilayah ${currentUser.asal_kecamatan} belum terdapat isian kolom catatan yang terisi.`;
+
+            const pRek = kumpulRek.length > 0
+              ? `Merujuk pada rekomendasi yang diisikan pengawas (${kumpulRek.length} laporan terisi), arahan perbaikan yang ditekankan meliputi: ${kumpulRek.join(' ')}`
+              : `Belum terdapat isian kolom rekomendasi yang tercatat pada laporan di wilayah ${currentUser.asal_kecamatan}.`;
+
+            const pTl = kumpulTl.length > 0
+              ? `Sebagai langkah tindak lanjut yang tercatat (${kumpulTl.length} laporan terisi), rencana aksi yang dirumuskan meliputi: ${kumpulTl.join(' ')}`
+              : `Belum terdapat isian kolom tindak lanjut yang tercatat pada laporan di wilayah ${currentUser.asal_kecamatan}.`;
+
+            sintesisEl.innerHTML = `
+              <p style="margin:0;"><strong>Catatan:</strong> ${pCatatan}</p>
+              <p style="margin:0;"><strong>Rekomendasi:</strong> ${pRek}</p>
+              <p style="margin:0;"><strong>Tindak Lanjut:</strong> ${pTl}</p>
+            `;
+          }
+        }
+          if (rataNilaiEl) rataNilaiEl.textContent = rata;
+        }
+      }
+
+      document.getElementById('rekapSummaryBox').textContent = `${filtered.length} Laporan Tercatat`;
+      renderRekapCharts(filtered);
+
+      if (filtered.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;">Tidak ada data untuk filter ini.</td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = filtered.map((row, idx) => {
+        const catatanSup = row.catatan_pengawas || row.catatan_supervisor || row.catatan_umum || row.catatan || '';
+        const rekomendasiSup = row.rekomendasi || row.saran_tindak_lanjut || '';
+        const tindakLanjutSup = row.tindak_lanjut || row.rtl || '';
+        const detailBlocks = [];
+        if (catatanSup) detailBlocks.push(`<div><strong>Catatan:</strong> ${catatanSup}</div>`);
+        if (rekomendasiSup) detailBlocks.push(`<div><strong>Rekomendasi:</strong> ${rekomendasiSup}</div>`);
+        if (tindakLanjutSup) detailBlocks.push(`<div><strong>Tindak Lanjut:</strong> ${tindakLanjutSup}</div>`);
+        const detailBoxId = `rekap-detail-${idx}`;
+const infoDetailHtml = detailBlocks.length > 0
+  ? `<div style="margin-top:6px;"><button type="button" class="btn btn-sm btn-outline" onclick="toggleRekapDetail('${detailBoxId}', this)">Lihat Catatan, Rekomendasi &amp; Tindak Lanjut</button><div id="${detailBoxId}" class="hidden" style="margin-top:8px; padding-top:8px; border-top:1px dashed #cbd5e1; font-size:12px; color:#334155;">${detailBlocks.join('')}</div></div>`
+  : '';
+
+        return `
+        <tr>
+          <td>${idx + 1}</td>
+          <td><strong>${row.periode_bulan}</strong>${row.is_simulasi ? ' <span class="badge-sim">SIMULASI</span>' : ''}</td>
+          <td>${row.kecamatan_sasaran}</td>
+          <td>
+            <strong>${row.nama_sekolah}</strong><br>Guru: ${row.nama_guru}
+            ${infoDetailHtml}
+          </td>
+          <td><strong>${row.nilai_akhir}</strong> (${row.kategori_nilai})</td>
+          <td>${row.pengawas_nama}<br><small>Asal: ${row.pengawas_asal_kecamatan}</small></td>
+          <td><button class="btn btn-sm btn-outline" onclick='cetakLaporan(${JSON.stringify(row).replace(/'/g, "&#39;")})'>Cetak</button></td>
+        </tr>
+      `;
+      }).join('');
+    }
+
+    // PANEL ADMIN: SAKELAR PINTU & SINTESIS NARASI UMUM
+    function togglePortalGate(target) {
+      const cfg = getPortalGateConfig();
+      if (target === 'reg') cfg.regOpen = !cfg.regOpen;
+      if (target === 'login') cfg.loginOpen = !cfg.loginOpen;
+      savePortalGateConfig(cfg);
+      showGateAlert(`Pengaturan diperbarui: Registrasi <strong>${cfg.regOpen ? 'DIBUKA' : 'DIMATIKAN'}</strong>, Login Pengawas <strong>${cfg.loginOpen ? 'DIBUKA' : 'DIMATIKAN'}</strong>.`);
+    }
+
+    function setBothGates(isOpen) {
+      savePortalGateConfig({ regOpen: isOpen, loginOpen: isOpen });
+      showGateAlert(`Pintu Registrasi dan Login Pengawas sekaligus telah <strong>${isOpen ? 'DIBUKA' : 'DIMATIKAN'}</strong>.`);
+    }
+
+    function showGateAlert(htmlMsg) {
+      const el = document.getElementById('gateAlert');
+      el.className = 'alert alert-success';
+      el.innerHTML = htmlMsg;
+      el.classList.remove('hidden');
+    }
+
+    async function loadAdminPanel() {
+      applyPortalGateUI();
+      try {
+        allRekapCache = await fetchAllCombinedReports();
+        renderAdminNarasi();
+        updateAdminSummaryCards();
+      } catch (err) {
+        document.getElementById('adminNarasiList').innerHTML = `<div class="alert alert-danger">Gagal memuat data: ${err.message}</div>`;
+      }
+    }
+function updateAdminSummaryCards() {
+    const cfg = typeof getPortalGateConfig === 'function' ? getPortalGateConfig() : {};
+    const regOpen = !!cfg.regOpen;
+    const logOpen = !!cfg.loginOpen;
+    const portalEl = document.getElementById('adminStatPortal');
+    const portalSubEl = document.getElementById('adminStatPortalSub');
+    if (portalEl && portalSubEl) {
+      if (regOpen && logOpen) {
+        portalEl.textContent = 'TERBUKA';
+        portalEl.style.color = '#15803d';
+        portalSubEl.textContent = 'Registrasi & Login Aktif';
+      } else if (!regOpen && !logOpen) {
+        portalEl.textContent = 'TERTUTUP';
+        portalEl.style.color = '#b91c1c';
+        portalSubEl.textContent = 'Registrasi & Login Dimatikan';
+      } else {
+        portalEl.textContent = 'TERBATAS';
+        portalEl.style.color = '#b45309';
+        portalSubEl.textContent = (regOpen ? 'Registrasi Buka' : 'Registrasi Tutup') + ' • ' + (logOpen ? 'Login Buka' : 'Login Tutup');
+      }
+    }
+
+    const total = Array.isArray(allRekapCache) ? allRekapCache.length : 0;
+    const lapEl = document.getElementById('adminStatLaporan');
+    if (lapEl) lapEl.textContent = total;
+
+    const avgEl = document.getElementById('adminStatAvg');
+    const predEl = document.getElementById('adminStatPredikat');
+    if (avgEl && predEl) {
+      if (total > 0) {
+        const sum = allRekapCache.reduce((acc, r) => acc + (parseFloat(r.nilai_akhir) || 0), 0);
+        const avg = (sum / total).toFixed(1);
+        avgEl.textContent = avg;
+        const numAvg = parseFloat(avg);
+        predEl.textContent = numAvg >= 86 ? 'Sangat Baik' : numAvg >= 71 ? 'Baik' : numAvg >= 56 ? 'Cukup' : 'Kurang';
+      } else {
+        avgEl.textContent = '0.0';
+        predEl.textContent = 'Belum ada data';
+      }
+    }
+
+    const narasiCount = Array.isArray(allRekapCache) ? allRekapCache.filter(r =>
+      (r.catatan_supervisor && r.catatan_supervisor.trim()) ||
+      (r.rekomendasi && r.rekomendasi.trim()) ||
+      (r.tindak_lanjut && r.tindak_lanjut.trim())
+    ).length : 0;
+    const narEl = document.getElementById('adminStatNarasi');
+    if (narEl) narEl.textContent = narasiCount;
+  }
+  let daftarPengawasCache = [];
+
+  async function bukaModalDaftarPengawas() {
+    document.getElementById('modalDaftarPengawas').classList.remove('hidden');
+    document.getElementById('alertSalinAkun').classList.add('hidden');
+    const tbody = document.getElementById('tbodyDaftarPengawas');
+    const infoEl = document.getElementById('infoJumlahPengawas');
+    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:18px;">Mengambil data akun dari Supabase...</td></tr>';
+    infoEl.textContent = 'Memuat daftar akun...';
+
+    try {
+      const { data, error } = await db
+        .from('superkolak_pengawas')
+        .select('nama_lengkap, username, password, asal_kecamatan')
+        .order('asal_kecamatan', { ascending: true })
+        .order('nama_lengkap', { ascending: true });
+
+      if (error) throw error;
+      const listPengawas = Array.isArray(data) ? data : [];
+        const listKec = typeof KECAMATAN_LOTENG !== 'undefined' ? KECAMATAN_LOTENG : [];
+        const akunAdminKecOtomatis = listKec.map(kec => {
+          const slug = kec.toLowerCase().replace(/[^a-z0-9]/g, '');
+          const uname = `admin_${slug}`;
+          const dariDb = listPengawas.find(
+            u => (u.username || '').trim().toLowerCase() === uname ||
+                 ((u.nama_lengkap || '').trim().toLowerCase() === `admin kecamatan ${kec.toLowerCase()}`)
+          );
+          return dariDb
+            ? { ...dariDb, asal_kecamatan: dariDb.asal_kecamatan || kec }
+            : {
+                nama_lengkap: `Admin Kecamatan ${kec}`,
+                username: uname,
+                password: 'pasloteng',
+                asal_kecamatan: kec,
+                role: 'admin_kecamatan',
+                is_admin_kec_otomatis: true
+              };
+        });
+        const usernameOtomatisSet = new Set(akunAdminKecOtomatis.map(a => (a.username || '').trim().toLowerCase()));
+        const pengawasMurni = listPengawas.filter(u => !usernameOtomatisSet.has((u.username || '').trim().toLowerCase()));
+        daftarPengawasCache = [...akunAdminKecOtomatis, ...pengawasMurni];
+
+      const selKec = document.getElementById('filterKecPengawas');
+      const prevVal = selKec.value;
+      const kecUnik = [...new Set(daftarPengawasCache.map(u => (u.asal_kecamatan || '').trim()).filter(Boolean))].sort();
+      selKec.innerHTML = '<option value="">Semua Kecamatan (' + daftarPengawasCache.length + ' akun)</option>' +
+        kecUnik.map(k => `<option value="${k}">${k}</option>`).join('');
+      if (kecUnik.includes(prevVal)) selKec.value = prevVal;
+
+      renderTabelPengawas();
+    } catch (err) {
+      tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; color:#b91c1c; padding:16px;">Gagal memuat data pengawas: ${err.message}</td></tr>`;
+      infoEl.textContent = 'Gagal memuat data.';
+    }
+  }
+
+  function tutupModalDaftarPengawas() {
+    document.getElementById('modalDaftarPengawas').classList.add('hidden');
+  }
+
+  function renderTabelPengawas() {
+    const fKec = (document.getElementById('filterKecPengawas').value || '').trim();
+    const q = (document.getElementById('cariNamaPengawas').value || '').trim().toLowerCase();
+    const tbody = document.getElementById('tbodyDaftarPengawas');
+    const infoEl = document.getElementById('infoJumlahPengawas');
+
+    const hasil = daftarPengawasCache.filter(u => {
+      const cocokKec = !fKec || (u.asal_kecamatan || '').trim() === fKec;
+      const nama = (u.nama_lengkap || '').toLowerCase();
+      const uname = (u.username || '').toLowerCase();
+      const cocokCari = !q || nama.includes(q) || uname.includes(q);
+      return cocokKec && cocokCari;
+    });
+
+    infoEl.textContent = `Menampilkan ${hasil.length} dari total ${daftarPengawasCache.length} akun pengawas` + (fKec ? ` di Kecamatan ${fKec}` : '');
+
+    if (hasil.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:18px; color:var(--text-muted);">Tidak ada akun pengawas yang sesuai filter.</td></tr>';
+      return;
+    }
+
+    tbody.innerHTML = hasil.map((u, idx) => {
+      const nama = u.nama_lengkap || '-';
+      const kec = u.asal_kecamatan || '-';
+      const uname = u.username || '-';
+      const pwd = u.password || '-';
+      const isDefault = pwd.toLowerCase() === 'pasloteng' || pwd === '1234' || pwd === '123456' || pwd === uname;
+      const badgePwd = isDefault
+        ? '<span style="font-size:10.5px; background:#fef3c7; color:#92400e; padding:2px 6px; border-radius:4px; margin-left:6px;">Standar</span>'
+        : '<span style="font-size:10.5px; background:#dcfce7; color:#166534; padding:2px 6px; border-radius:4px; margin-left:6px;">Sudah Diganti</span>';
+
+      return `
+        <tr>
+          <td>${idx + 1}</td>
+          <td style="font-weight:600;">${nama}</td>
+          <td>${kec}</td>
+          <td><code style="background:#f1f5f9; padding:2px 6px; border-radius:4px;">${uname}</code></td>
+          <td><code style="background:#f1f5f9; padding:2px 6px; border-radius:4px; font-weight:700;">${pwd}</code>${badgePwd}</td>
+          <td style="text-align:center; white-space:nowrap;">
+            <div style="display:inline-flex; gap:6px; align-items:center;">
+              <button type="button" class="btn btn-sm btn-primary"
+                style="padding:5px 10px; font-size:11.5px; min-width:74px; box-shadow:0 2px 0 #1e3a8a; transition:all 0.12s ease; cursor:pointer;"
+                onmousedown="this.style.transform='translateY(2px)'; this.style.boxShadow='none';"
+                onmouseup="this.style.transform=''; this.style.boxShadow='0 2px 0 #1e3a8a';"
+                onmouseleave="this.style.transform=''; this.style.boxShadow='0 2px 0 #1e3a8a';"
+                onclick="salinInfoAkun('${nama.replace(/'/g, "\\'")}', '${kec.replace(/'/g, "\\'")}', '${uname.replace(/'/g, "\\'")}', '${pwd.replace(/'/g, "\\'")}', this)">
+                Salin
+              </button>
+              <button type="button" class="btn btn-sm btn-outline"
+                style="padding:5px 9px; font-size:11.5px; border-color:#d97706; color:#b45309; cursor:pointer;"
+                title="Kembalikan password ke pasloteng"
+                onclick="resetPasswordPengawas('${uname.replace(/'/g, "\\'")}', '${nama.replace(/'/g, "\\'")}', this)">
+                Reset
+              </button>
+            </div>
+          </td>
+        </tr>
+      `;
+    }).join('');
+  }
+
+  async function resetPasswordPengawas(uname, nama, btnEl) {
+    if (!confirm(`Reset password akun "${nama}" (${uname}) kembali ke standar "pasloteng"?`)) return;
+    const teksAsli = btnEl ? btnEl.textContent : 'Reset';
+    if (btnEl) {
+      btnEl.disabled = true;
+      btnEl.textContent = '...';
+    }
+    try {
+      const { error } = await db
+        .from('superkolak_pengawas')
+        .update({ password: 'pasloteng' })
+        .eq('username', uname);
+      if (error) throw error;
+
+      const item = daftarPengawasCache.find(u => u.username === uname);
+      if (item) item.password = 'pasloteng';
+      renderTabelPengawas();
+
+      const al = document.getElementById('alertSalinAkun');
+      al.textContent = `✓ Password "${nama}" (${uname}) berhasil direset kembali ke "pasloteng".`;
+      al.classList.remove('hidden');
+      setTimeout(() => al.classList.add('hidden'), 4500);
+    } catch (err) {
+      alert('Gagal mereset password: ' + err.message);
+      if (btnEl) {
+        btnEl.disabled = false;
+        btnEl.textContent = teksAsli;
+      }
+    }
+  }
+
+  function salinInfoAkun(nama, kec, uname, pwd, btnEl) {
+    const teks = `Akun SUPERKOLAK Lombok Tengah\nNama: ${nama}\nKecamatan: ${kec}\nUsername: ${uname}\nPassword: ${pwd}`;
+    const beriEfekTersalin = () => {
+      if (btnEl) {
+        btnEl.textContent = '✓ Tersalin';
+        btnEl.style.background = '#15803d';
+        btnEl.style.borderColor = '#15803d';
+        btnEl.style.boxShadow = '0 2px 0 #14532d';
+        setTimeout(() => {
+          btnEl.textContent = 'Salin';
+          btnEl.style.background = '';
+          btnEl.style.borderColor = '';
+          btnEl.style.boxShadow = '0 2px 0 #1e3a8a';
+        }, 2000);
+      }
+      const al = document.getElementById('alertSalinAkun');
+      al.textContent = `✓ Info akun "${nama}" (${uname}) berhasil disalin! Silakan tempel (Paste) di WhatsApp.`;
+      al.classList.remove('hidden');
+      setTimeout(() => al.classList.add('hidden'), 4000);
+    };
+
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(teks).then(beriEfekTersalin).catch(() => {
+        prompt('Salin manual info akun berikut:', teks);
+      });
+    } else {
+      const ta = document.createElement('textarea');
+      ta.value = teks;
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand('copy');
+      document.body.removeChild(ta);
+      beriEfekTersalin();
+    }
+  }
+    function renderAdminNarasi() {
+      const fKec = document.getElementById('adminFilterKec').value;
+      const fBln = document.getElementById('adminFilterBulan').value;
+      const listEl = document.getElementById('adminNarasiList');
+      const sumEl = document.getElementById('adminNarasiSummary');
+
+      const filtered = allRekapCache.filter(r => {
+        if (fKec && r.kecamatan_sasaran !== fKec) return false;
+        if (fBln && r.periode_bulan !== fBln) return false;
+        return true;
+      });
+
+      const berisiNarasi = filtered.filter(r => (r.catatan_supervisor || r.rekomendasi || r.tindak_lanjut));
+      sumEl.innerHTML = `Ditemukan <strong>${berisiNarasi.length}</strong> laporan yang memuat narasi dari total <strong>${filtered.length}</strong> laporan masuk.`;
+
+      if (berisiNarasi.length === 0) {
+        listEl.innerHTML = '<div style="text-align:center;color:var(--text-muted);padding:16px;">Belum ada isian catatan supervisor, rekomendasi, atau tindak lanjut pada filter ini.</div>';
+        return;
+      }
+
+      listEl.innerHTML = berisiNarasi.map((r, i) => {
+  const narasiBoxId = `admin-narasi-${i}`;
+  return `
+    <div class="narasi-box">
+      <div class="narasi-meta">
+        ${i + 1}. ${r.nama_sekolah} (Kec. ${r.kecamatan_sasaran}) &bull; Periode ${r.periode_bulan} &bull; Pengawas: ${r.pengawas_nama || '-'}
+      </div>
+      <div style="margin-top:8px;">
+        <button type="button" class="btn btn-sm btn-outline" onclick="toggleRekapDetail('${narasiBoxId}', this)">Lihat Catatan, Rekomendasi &amp; Tindak Lanjut</button>
+      </div>
+      <div id="${narasiBoxId}" class="hidden" style="margin-top:8px;">
+        <div class="narasi-item"><strong>Catatan Supervisor:</strong> ${r.catatan_supervisor || '-'}</div>
+        <div class="narasi-item"><strong>Rekomendasi:</strong> ${r.rekomendasi || '-'}</div>
+        <div class="narasi-item"><strong>Tindak Lanjut:</strong> ${r.tindak_lanjut || '-'}</div>
+      </div>
+    </div>
+  `;
+}).join('');
+    }
+
+    function salinNarasiUmum() {
+      const fKec = document.getElementById('adminFilterKec').value;
+      const fBln = document.getElementById('adminFilterBulan').value;
+      const filtered = allRekapCache.filter(r => {
+        if (fKec && r.kecamatan_sasaran !== fKec) return false;
+        if (fBln && r.periode_bulan !== fBln) return false;
+        return (r.catatan_supervisor || r.rekomendasi || r.tindak_lanjut);
+      });
+
+      if (filtered.length === 0) {
+        alert('Belum ada narasi yang dapat disalin.');
+        return;
+      }
+
+      const teks = filtered.map((r, i) => (
+        `${i + 1}. ${r.nama_sekolah} (${r.kecamatan_sasaran} - ${r.periode_bulan}) | Pengawas: ${r.pengawas_nama}\n` +
+        `   - Catatan Supervisor: ${r.catatan_supervisor || '-'}\n` +
+        `   - Rekomendasi: ${r.rekomendasi || '-'}\n` +
+        `   - Tindak Lanjut: ${r.tindak_lanjut || '-'}`
+      )).join('\n\n');
+
+
+      navigator.clipboard.writeText(teks).then(() => {
+        alert('Seluruh rangkuman narasi berhasil disalin ke clipboard! Silakan tempel (Paste) di Word atau WhatsApp.');
+      });
+    }
+
+    function cetakLaporan(row) {
+      const praRows = (row.praobservasi || []).map(p => `
+        <tr>
+          <td style="text-align:center;">${p.no}</td>
+          <td>${p.komponen}</td>
+          <td style="text-align:center;">${p.status === 'Ya' ? '&#10003;' : ''}</td>
+          <td style="text-align:center;">${p.status === 'Tidak' ? '&#10003;' : ''}</td>
+          <td>${p.status === 'Opsional' ? '(Opsional dilewati) ' : ''}${p.catatan || ''}</td>
+        </tr>
+      `).join('');
+
+      const obsSkorRows = (row.observasi_skor || []).map(o => `
+        <tr>
+          <td style="text-align:center;">${o.no}</td>
+          <td>${o.aspek}</td>
+          <td style="text-align:center;"><strong>${o.skor || '-'}</strong></td>
+          <td>${o.catatan || ''}</td>
+        </tr>
+      `).join('');
+
+      const obsPmRows = (row.observasi_pm || []).map(m => `
+        <tr>
+          <td style="text-align:center;">${m.no}</td>
+          <td>${m.aspek}</td>
+          <td style="text-align:center;"><strong>${m.bukti || '-'}</strong></td>
+          <td>${m.catatan || ''}</td>
+        </tr>
+      `).join('');
+
+      const pascaRows = (row.pascaobservasi || []).map(ps => `
+        <tr>
+          <td style="text-align:center;">${ps.no}</td>
+          <td>${ps.tanya}</td>
+          <td>${ps.catatan || ''}</td>
+        </tr>
+      `).join('');
+
+      const printHtml = `
+        <h2>SUPERVISI AKADEMIK KOLABORASI KLINIS (SUPERKOLAK)${row.is_simulasi ? ' [CONTOH SIMULASI]' : ''}</h2>
+        <h3>KABUPATEN LOMBOK TENGAH — PERIODE ${row.periode_bulan.toUpperCase()}</h3>
+        <hr style="margin:10px 0;border:1px solid #000;">
+
+        <p><strong>I. PRAOBSERVASI (Telaah RPP / Modul Ajar)</strong></p>
+        <table style="border:none;margin-bottom:6px;">
+          <tr><td style="border:none;width:160px;">Nama Sekolah</td><td style="border:none;">: ${row.nama_sekolah} (Kec. ${row.kecamatan_sasaran})</td></tr>
+          <tr><td style="border:none;">Nama Guru</td><td style="border:none;">: ${row.nama_guru}</td></tr>
+          <tr><td style="border:none;">Mata Pelajaran</td><td style="border:none;">: ${row.mata_pelajaran}</td></tr>
+          <tr><td style="border:none;">Kelas / Semester</td><td style="border:none;">: ${row.kelas_semester}</td></tr>
+          <tr><td style="border:none;">Materi Pokok</td><td style="border:none;">: ${row.materi_pokok}</td></tr>
+        </table>
+        <table>
+          <thead>
+            <tr><th style="width:32px;">No</th><th>Komponen RPP/MA</th><th style="width:45px;">Ya</th><th style="width:50px;">Tidak</th><th>Catatan</th></tr>
+          </thead>
+          <tbody>${praRows}</tbody>
+        </table>
+
+        <div class="print-page-break"></div>
+        <p><strong>II. PELAKSANAAN OBSERVASI (Implementasi Pembelajaran Mendalam)</strong></p>
+        <table>
+          <thead>
+            <tr><th style="width:32px;">No</th><th>Aspek yang Diamati</th><th style="width:75px;">Skor (1–4)</th><th>Catatan</th></tr>
+          </thead>
+          <tbody>
+            ${obsSkorRows}
+            <tr>
+              <td colspan="2" style="text-align:right;"><strong>TOTAL SKOR / NILAI AKHIR (NA = Skor / 32 &times; 100)</strong></td>
+              <td style="text-align:center;"><strong>${row.total_skor} / ${row.nilai_akhir}</strong></td>
+              <td><strong>Kategori: ${row.kategori_nilai}</strong></td>
+            </tr>
+          </tbody>
+        </table>
+
+        <p><strong>E. Implementasi Pembelajaran Mendalam (Butir 9 – 20)</strong></p>
+        <table>
+          <thead>
+            <tr><th style="width:32px;">No</th><th>Aspek yang Diamati</th><th style="width:95px;">Bukti Pembelajaran</th><th>Catatan</th></tr>
+          </thead>
+          <tbody>${obsPmRows}</tbody>
+        </table>
+        <p><strong>Catatan Supervisor:</strong> ${row.catatan_supervisor || '-'}</p>
+        <p><strong>Rekomendasi:</strong> ${row.rekomendasi || '-'}</p>
+        <p><strong>Tindak Lanjut:</strong> ${row.tindak_lanjut || '-'}</p>
+
+        <div class="print-page-break"></div>
+        <p><strong>III. PASCAOBSERVASI (Refleksi Pembelajaran)</strong></p>
+        <table>
+          <thead>
+            <tr><th style="width:32px;">No</th><th>Pertanyaan Refleksi</th><th>Catatan</th></tr>
+          </thead>
+          <tbody>${pascaRows}</tbody>
+        </table>
+
+        <div class="ttd-grid">
+          <div>
+            Guru Kelas / Guru Mapel,<br><br><br><br>
+            <strong><u>${row.nama_guru}</u></strong>
+          </div>
+          <div>
+            Lombok Tengah, ${row.tanggal_supervisi}<br>
+            Supervisor,<br><br><br>
+            <strong><u>${row.pengawas_nama}</u></strong>
+          </div>
+        </div>
+        <div style="text-align:center;margin-top:24px;font-size:10.5pt;">
+          Mengetahui:<br>
+          Kepala ${row.nama_sekolah}<br><br><br><br>
+          <strong><u>${row.nama_kepala_sekolah}</u></strong>
+        </div>
+      `;
+
+      document.getElementById('printArea').innerHTML = printHtml;
+      window.print();
+    }
+  </script>
+</body>
+</html>
